@@ -43,7 +43,16 @@ export function Hero() {
             자루가 대신 기억해요
           </h1>
 
-          <p className="hero__sub reveal" style={revealDelay(160)}>
+          <p className="hero__pitch reveal" style={revealDelay(140)}>
+            수리비·청소·지원금처럼
+            <br />
+            <strong>
+              몰라서 낭비하는 <span className="hero__accent">시간과 돈</span>도
+              줄여드려요.
+            </strong>
+          </p>
+
+          <p className="hero__sub reveal" style={revealDelay(200)}>
             {ITEMS.map((item, i) => (
               <Fragment key={item}>
                 {i > 0 && " · "}
@@ -59,7 +68,7 @@ export function Hero() {
             언제 했는지 기억 안 나는 것들, 자루가 챙겨드릴게요.
           </p>
 
-          <ul className="hero__chips reveal" style={revealDelay(240)}>
+          <ul className="hero__chips reveal" style={revealDelay(260)}>
             {CHIPS.map((chip) => (
               <li key={chip} className="hero__chip">
                 {chip}
@@ -67,7 +76,7 @@ export function Hero() {
             ))}
           </ul>
 
-          <div className="hero__actions reveal" style={revealDelay(320)}>
+          <div className="hero__actions reveal" style={revealDelay(340)}>
             <a className="btn btn--primary" href="#preorder">
               사전예약하고 먼저 받아보기
             </a>

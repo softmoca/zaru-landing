@@ -365,7 +365,26 @@ input {
 }
 
 .hero__title {
-  margin: 18px 0 20px;
+  margin: 18px 0 18px;
+}
+
+/* H1 과 서브 사이의 한 줄 — 서브보다는 크고 H1 보다는 훨씬 작게 */
+.hero__pitch {
+  max-width: 30ch;
+  margin-bottom: 18px;
+  font-size: clamp(1.28rem, 1.05rem + 0.9vw, 1.72rem);
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: var(--forest);
+}
+
+.hero__pitch strong {
+  font-weight: var(--weight-bold);
+}
+
+/* 팔레트의 "경고·중요" 색. 순수 빨강 대신 소프트 코랄로 */
+.hero__accent {
+  color: var(--coral);
 }
 
 .hero__sub {

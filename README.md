@@ -56,23 +56,32 @@ src/
     Marquee.tsx           [2.5] 마퀴 띠
     Problems.tsx          [3] 문제 3카드
     About.tsx             [4] 자루 소개
-    StickyJourney.tsx     [5] 4축 스티키 저니 ★
+    StickyJourney.tsx     [5] 3축 스티키 저니 ★ (홈 / 살림정보 / 마이)
     Scenario.tsx          [6] 시나리오
     LoopSection.tsx       [7] 다시 루프 (원형 시퀀스) ★
     Preorder.tsx          [8] 사전예약 CTA
     Footer.tsx            [9] 푸터
-    mockups/              앱 화면 목업 (플레이스홀더 — 실제 이미지로 교체 예정)
+    mockups/              PhoneFrame + 캡처 목록(mockups.ts)
   hooks/                  reveal / inView / 스크롤 진행률 / 카운트업 / reduced-motion
   lib/analytics.ts        이벤트 전송 · ?src= · 사전예약
   lib/supabase.ts         클라이언트 + 필요한 테이블 DDL 주석
   styles/                 tokens.css(팔레트·모션) + styles.css(전 섹션)
 ```
 
-## 목업 교체
+## 목업 이미지
 
-앱 화면은 아직 이미지가 없어 CSS/SVG 플레이스홀더로 그려져 있습니다.
-실제 프로토타입이 나오면 `src/components/mockups/PhoneFrame.tsx` 안쪽 내용만
-`<img>` 로 갈아끼우면 됩니다. 프레임·그림자·전환은 그대로 재사용됩니다.
+앱 화면은 프로토타입 **실제 캡처**입니다.
+
+- 원본(1170×2532)은 `assets-src/mockups/` — 배포에 포함되지 않습니다.
+- `public/mockups/` 에는 폭 780px 로 줄인 것만 둡니다 (표시 폭의 약 3배).
+- 화면이 바뀌면 원본을 갈아끼운 뒤 다시 줄여 넣으세요.
+
+```bash
+sips --resampleWidth 780 assets-src/mockups/01-home.png --out public/mockups/01-home.png
+```
+
+`alt` 와 경로는 `src/components/mockups/mockups.ts` 한 곳에 모여 있습니다.
+히어로만 `eager`, 나머지는 `lazy` 입니다.
 
 ## 문서
 
@@ -88,7 +97,7 @@ src/
 |---|---|---|
 | `view` | 진입 1회 | 모수 |
 | `depth` | 스크롤 25/50/75/100% 각 1회 | 어디서 이탈하는지 |
-| `step_view` | [5] 스티키 스텝 1~4 도달 각 1회 | 4축 중 무엇이 먹히는지 |
+| `step_view` | [5] 스티키 스텝 1~3 도달 각 1회 | 3축 중 무엇이 먹히는지 |
 | `notify` | 사전예약 이메일 제출 | **핵심 지표** |
 | `kakao_click` | 카카오톡 채널 버튼 클릭 | 보조 전환 |
 

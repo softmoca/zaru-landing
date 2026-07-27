@@ -963,6 +963,12 @@ input {
 
 /* ── 8. [6] 시나리오 ──────────────────────────────────────────────────── */
 
+/* 크림이 [5]~[8] 내내 이어져 리듬이 없어서, 여기만 화이트로 끊어준다.
+   [4] 소개와 같은 규칙 — 화이트 = 잠깐 숨 고르는 구간. */
+.scenario {
+  background: var(--white);
+}
+
 .beats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -981,11 +987,12 @@ input {
   color: var(--sage);
 }
 
+/* 섹션이 화이트라 카드는 크림으로 뒤집는다 */
 .beat {
   flex: 1;
   padding: clamp(22px, 2.6vw, 32px);
   border-radius: var(--radius-lg);
-  background: var(--white);
+  background: var(--cream);
 }
 
 .beat__mark {
@@ -1005,6 +1012,57 @@ input {
   color: var(--olive);
 }
 
+/* 관리 팁 — 진입(바텀시트) → 도착(조립소) 두 장면 */
+.tipflow {
+  display: grid;
+  /* 글 칸을 본문 폭에 맞춰 묶어야 두 폰이 글 바로 옆에 붙는다 */
+  grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 48px);
+  align-items: center;
+  margin-top: clamp(52px, 7vw, 88px);
+  padding-top: clamp(40px, 5vw, 64px);
+  border-top: 1px solid var(--olive-16);
+}
+
+.tipflow__title {
+  margin: 14px 0 16px;
+}
+
+.tipflow__desc {
+  max-width: 38ch;
+}
+
+.tipflow__shots {
+  display: flex;
+  align-items: center;
+  /* 글 끝과 붙여 가운데가 비어 보이지 않게 */
+  justify-content: flex-start;
+  gap: clamp(10px, 1.6vw, 22px);
+}
+
+.tipflow__shot {
+  margin: 0;
+}
+
+.tipflow__shot .phone {
+  height: clamp(330px, 44svh, 420px);
+}
+
+.tipflow__caption {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink-40);
+}
+
+.tipflow__arrow {
+  flex: none;
+  /* 캡션 높이만큼 위로 — 폰 가운데에 오도록 */
+  margin-bottom: 36px;
+  font-size: 1.3rem;
+  color: var(--sage);
+}
+
 @media (max-width: 860px) {
   .beats {
     grid-template-columns: 1fr;
@@ -1013,6 +1071,35 @@ input {
   /* 세로로 쌓이면 순서가 그 자체로 읽히니 화살표는 뺀다 */
   .beats__arrow {
     display: none;
+  }
+
+  .tipflow {
+    grid-template-columns: 1fr;
+  }
+
+  .tipflow__desc {
+    max-width: none;
+  }
+
+  .tipflow__shots {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 좁은 화면에서도 두 장면을 나란히 둔다 — 흐름이 한눈에 읽혀야 해서 */
+  .tipflow__shot .phone {
+    height: clamp(250px, 36svh, 320px);
+  }
+
+  .tipflow__caption {
+    margin-top: 10px;
+    font-size: 0.78rem;
+  }
+
+  .tipflow__arrow {
+    margin-bottom: 30px;
+    font-size: 1rem;
   }
 }
 

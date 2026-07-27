@@ -1,0 +1,66 @@
+/* ============================================================================
+   자루 디자인 토큰
+   DESIGN.md 1. 컬러 시스템 표 그대로.
+
+   사용 비율: 웜크림 55% · 올리브 25% · 딥포레스트 10% · 베이지 5% · 노랑/코랄 5%
+   → 초록으로 화면을 채우지 않는다. 크림 공간 위에서 올리브가 브랜드를 대표한다.
+   ========================================================================== */
+
+:root {
+  /* ── 팔레트 ─────────────────────────────────────────────────────────── */
+  --olive: #667a3e; /* 메인 브랜드 */
+  --forest: #344126; /* 진한 배경·제목 */
+  --cream: #f8f3e8; /* 기본 배경 */
+  --beige: #e5d5b8; /* 보조 배경 */
+  --sage: #a8b887; /* 밝은 보조색 */
+  --mustard: #f3c85b; /* 포인트 */
+  --ink: #36352f; /* 본문 글자 */
+  --coral: #d8795f; /* 경고·중요 */
+
+  --white: #ffffff;
+
+  /* 위 팔레트에서 파생된 값들 (새 색을 만들지 않고 알파만 조절) */
+  --olive-08: rgba(102, 122, 62, 0.08);
+  --olive-16: rgba(102, 122, 62, 0.16);
+  --olive-28: rgba(102, 122, 62, 0.28);
+  --forest-72: rgba(52, 65, 38, 0.72);
+  --ink-64: rgba(54, 53, 47, 0.64);
+  --ink-40: rgba(54, 53, 47, 0.4);
+  --cream-88: rgba(248, 243, 232, 0.88);
+
+  /* ── 타이포 ─────────────────────────────────────────────────────────── */
+  /* 굵기는 2단계만: 굵게(700) = 제목 / 보통(400~500) = 본문 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic",
+    sans-serif;
+  --weight-bold: 700;
+  --weight-body: 450;
+
+  --text-eyebrow: clamp(0.75rem, 0.72rem + 0.2vw, 0.85rem);
+  --text-body: clamp(0.98rem, 0.93rem + 0.25vw, 1.09rem);
+  --text-lead: clamp(1.05rem, 0.98rem + 0.4vw, 1.3rem);
+  --text-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
+  --text-h2: clamp(1.75rem, 1.35rem + 1.9vw, 3rem);
+  --text-h1: clamp(2.2rem, 1.5rem + 3.2vw, 4.15rem);
+  --text-display: clamp(3rem, 1.8rem + 5.5vw, 6.5rem);
+
+  /* ── 레이아웃 ───────────────────────────────────────────────────────── */
+  --page-max: 1180px;
+  --page-pad: clamp(20px, 5vw, 40px);
+  --header-h: 72px;
+  --header-h-compact: 58px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* ── 모션 ───────────────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-reveal: 0.75s;
+  --dur-step: 0.5s;
+  --dur-ui: 0.22s;
+
+  /* 스크롤 연동 값의 기본값 (JS 가 갱신) */
+  --zaru-progress: 0;
+  --loop-progress: 0;
+}

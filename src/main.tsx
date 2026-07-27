@@ -1,0 +1,14 @@
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./styles/tokens.css";
+import "./styles/styles.css";
+
+const root = document.getElementById("root");
+if (!root) throw new Error("#root 를 찾지 못했습니다.");
+
+createRoot(root).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

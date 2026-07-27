@@ -3,34 +3,34 @@ import { trackOnce } from "../lib/analytics";
 import { PhoneFrame } from "./mockups/PhoneFrame";
 import { MOCKUPS } from "./mockups/mockups";
 
-/* [5] 핵심 기능 4축 — ★ 스티키 저니 (이 페이지의 메인 이벤트)
+/* [5] 핵심 기능 3축 — ★ 스티키 저니 (이 페이지의 메인 이벤트)
 
-   좌측 비주얼이 sticky 로 고정된 채, 우측 4스텝이 지나갈 때마다 화면이 바뀐다.
+   좌측 비주얼이 sticky 로 고정된 채, 우측 3스텝이 지나갈 때마다 화면이 바뀐다.
    IntersectionObserver 로 "지금 화면 밴드를 가장 많이 차지한 스텝"을 골라
    비주얼의 data-active-step 을 갱신한다.
 
-   순서 주의: 정보 조립소는 03(덤 위치). 폰 목업 대신 정적 카드로 톤을 낮춘다. */
+   프로토타입의 하단 탭 3개(홈 / 살림정보 / 마이)를 그대로 따른다.
+   예전 "자루 픽"과 "자취 정보 조립소"는 각각 독립 축이 아니라
+   살림정보 안의 세그먼트(살림템 / 조립소)가 됐다. */
 
 const STEPS = [
   {
     n: 1,
-    title: "홈케어 주기 관리",
-    body: "욕실 · 세탁 · 쓰레기 같은 카테고리로 마지막 완료일과 다음 관리 시점을 확인합니다. 주기가 돌아오면 자루가 알림으로 알려드려요.",
+    title: "오늘 챙길 일",
+    body: "욕실 · 세탁 · 쓰레기 같은 카테고리마다 마지막으로 언제 했는지, 다음은 언제인지 보여드려요. 주기가 돌아오면 자루가 알림으로 불러드립니다. 주기 없이 적어만 두고 싶은 건 '적어두기'에 따로 모아둬요.",
+    shot: MOCKUPS.home,
   },
   {
     n: 2,
-    title: "자루 픽",
-    body: "상황과 소재에 맞는 용품과 서비스를 한곳에서 비교합니다. 직접 할지, 용품을 살지, 서비스에 맡길지 — 선택의 폭이 넓어집니다.",
+    title: "살림에 필요한 건 여기 다",
+    body: "용품과 대행 서비스를 나란히 놓고 고르는 살림템, 흩어진 자취 정보를 한 장으로 모은 조립소. 먼저 겪어본 사람들의 꿀팁과 Q&A까지 한곳에 있습니다.",
+    shot: MOCKUPS.supplies,
   },
   {
     n: 3,
-    title: "자취 정보 조립소",
-    body: "물때는 어떻게 없애지? 지원금은 어디까지 받지? 흩어진 자취 정보를 한 장으로 조립해 드립니다. 검색 대신, 정리된 답을 확인하세요.",
-  },
-  {
-    n: 4,
-    title: "마이",
-    body: "도움이 된 팁과 완료한 집안일 기록을 저장하고, 다음에 필요할 때 다시 꺼내봅니다.",
+    title: "쌓이는 기록",
+    body: "완료한 집안일과 저장해 둔 살림템 · 꿀팁이 차곡차곡 쌓입니다. 이번 달 몇 번이나 비워냈는지, 가끔 돌아보세요.",
+    shot: MOCKUPS.my,
   },
 ] as const;
 
@@ -88,23 +88,17 @@ export function StickyJourney() {
     <section className="section journey" id="features" aria-labelledby="journey-title">
       <div className="shell">
         <header className="section-title reveal">
-          <h2 id="journey-title">자루의 네 가지 축</h2>
+          <h2 id="journey-title">자루의 세 가지 축</h2>
         </header>
 
         <div className="journey__grid">
+          {/* 스텝과 화면은 같은 배열에서 나온다 — 개수가 어긋날 일이 없게 */}
           <div className="journey__visual" data-active-step={active}>
-            <div className="journey__screen" data-step="1">
-              <PhoneFrame {...MOCKUPS.home} />
-            </div>
-            <div className="journey__screen" data-step="2">
-              <PhoneFrame {...MOCKUPS.supplies} />
-            </div>
-            <div className="journey__screen" data-step="3">
-              <PhoneFrame {...MOCKUPS.assembly} />
-            </div>
-            <div className="journey__screen" data-step="4">
-              <PhoneFrame {...MOCKUPS.my} />
-            </div>
+            {STEPS.map((step) => (
+              <div className="journey__screen" key={step.n} data-step={step.n}>
+                <PhoneFrame {...step.shot} />
+              </div>
+            ))}
           </div>
 
           <ol className="journey__steps" ref={listRef}>

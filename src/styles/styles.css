@@ -806,8 +806,7 @@ input {
 
 .journey__visual[data-active-step="1"] > [data-step="1"],
 .journey__visual[data-active-step="2"] > [data-step="2"],
-.journey__visual[data-active-step="3"] > [data-step="3"],
-.journey__visual[data-active-step="4"] > [data-step="4"] {
+.journey__visual[data-active-step="3"] > [data-step="3"] {
   opacity: 1;
   transform: none;
 }

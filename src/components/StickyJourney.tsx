@@ -75,7 +75,10 @@ export function StickyJourney() {
           }
         });
         // 밴드에 걸린 스텝이 하나도 없으면 마지막 활성 스텝을 유지한다.
-        if (best) setActive(best);
+        if (!best) return;
+        setActive(best);
+        // 실제로 그 스텝에 도달했을 때만 기록한다 (마운트 시점의 기본값은 제외)
+        trackOnce(`step:${best}`, "step_view", { target: best });
       },
       { threshold: [0.25, 0.45, 0.65], rootMargin: "-25% 0px -35% 0px" }
     );
@@ -83,11 +86,6 @@ export function StickyJourney() {
     steps.forEach((step) => observer.observe(step));
     return () => observer.disconnect();
   }, []);
-
-  // 어느 축까지 읽고 이탈했는지 = 4축 중 무엇이 먹히는지
-  useEffect(() => {
-    trackOnce(`step:${active}`, "step_view", { target: active });
-  }, [active]);
 
   return (
     <section className="section journey" id="features" aria-labelledby="journey-title">

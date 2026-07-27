@@ -17,12 +17,62 @@
 | 메인 컬러 | `#667A3E` 올리브그린 |
 | 기본 배경 | `#F8F3E8` 웜 크림 |
 
-## 기술 스택 (예정)
+## 기술 스택
 
 - Vite + React 18 + TypeScript
-- 순수 CSS (또는 CSS Modules)
-- Supabase (이벤트 계측)
-- Vercel (배포)
+- 순수 CSS (`src/styles/tokens.css` + `src/styles/styles.css`) — UI 프레임워크 없음
+- 애니메이션은 IntersectionObserver + CSS transition/transform 직접 구현 (외부 라이브러리 없음)
+- Pretendard (jsDelivr CDN)
+- Supabase (이벤트 계측) · Vercel (배포)
+
+## 실행
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+```
+
+| 명령 | 설명 |
+|---|---|
+| `npm run dev` | 개발 서버 (HMR) |
+| `npm run build` | 타입 체크 + 프로덕션 빌드 → `dist/` |
+| `npm run preview` | 빌드 결과 미리보기 |
+| `npm run typecheck` | 타입만 검사 |
+
+확인해 볼 것:
+
+- `http://localhost:5173/?src=ig` — 유입 파라미터가 이벤트에 붙는지 (콘솔의 `[zaru:event]`)
+- 브라우저 개발자도구 → 모바일 뷰(≤768px) — 스티키 해제 / [7] 세로 타임라인
+- OS 설정에서 "동작 줄이기"를 켜고 새로고침 — 전환 없이 완성된 상태로 보이는지
+
+## 구조
+
+```
+src/
+  App.tsx                 섹션 조립 (문서의 [1]~[9] 순서 그대로)
+  components/
+    Hero.tsx              [1] 히어로 + 패럴랙스
+    Empathy.tsx           [2] 공감 (형광 밑줄은 페이지 전체에서 여기 1회만)
+    Marquee.tsx           [2.5] 마퀴 띠
+    Problems.tsx          [3] 문제 3카드
+    About.tsx             [4] 자루 소개
+    StickyJourney.tsx     [5] 4축 스티키 저니 ★
+    Scenario.tsx          [6] 시나리오
+    LoopSection.tsx       [7] 다시 루프 (원형 시퀀스) ★
+    Preorder.tsx          [8] 사전예약 CTA
+    Footer.tsx            [9] 푸터
+    mockups/              앱 화면 목업 (플레이스홀더 — 실제 이미지로 교체 예정)
+  hooks/                  reveal / inView / 스크롤 진행률 / 카운트업 / reduced-motion
+  lib/analytics.ts        이벤트 전송 · ?src= · 사전예약
+  lib/supabase.ts         클라이언트 + 필요한 테이블 DDL 주석
+  styles/                 tokens.css(팔레트·모션) + styles.css(전 섹션)
+```
+
+## 목업 교체
+
+앱 화면은 아직 이미지가 없어 CSS/SVG 플레이스홀더로 그려져 있습니다.
+실제 프로토타입이 나오면 `src/components/mockups/PhoneFrame.tsx` 안쪽 내용만
+`<img>` 로 갈아끼우면 됩니다. 프레임·그림자·전환은 그대로 재사용됩니다.
 
 ## 문서
 
@@ -32,8 +82,30 @@
 
 ## 계측
 
-- Supabase events 테이블: `view` / `depth`(스크롤) / `notify`(이메일) / `kakao_click` / 스티키 스텝 도달
-- `?src=` 파라미터로 유입 채널 분리 (ig / form / euta / openchat / woowa / friend)
+이벤트 5종을 Supabase `events` 테이블에 한 건씩 넣습니다.
+
+| 이벤트 | 시점 | 보는 것 |
+|---|---|---|
+| `view` | 진입 1회 | 모수 |
+| `depth` | 스크롤 25/50/75/100% 각 1회 | 어디서 이탈하는지 |
+| `step_view` | [5] 스티키 스텝 1~4 도달 각 1회 | 4축 중 무엇이 먹히는지 |
+| `notify` | 사전예약 이메일 제출 | **핵심 지표** |
+| `kakao_click` | 카카오톡 채널 버튼 클릭 | 보조 전환 |
+
+- `?src=` 를 진입 즉시 localStorage 에 저장해 이후 모든 이벤트에 붙입니다. 없으면 `direct`.
+  (ig / form / euta / openchat / woowa / friend)
+- 세션 id 는 익명 UUID 입니다.
+- **환경변수가 없으면 전송하지 않고 콘솔에만 찍습니다.** 개발 중 에러가 나지 않습니다.
+
+### 설정
+
+1. `.env.local.example` 을 `.env.local` 로 복사하고 값을 채웁니다.
+2. Supabase 프로젝트를 **자루용으로 새로** 만듭니다.
+   조립소(1차 아이템) 프로젝트를 재사용하면 검증 데이터가 섞입니다.
+3. 필요한 테이블 DDL 은 [`src/lib/supabase.ts`](src/lib/supabase.ts) 상단 주석에 있습니다
+   (`events`, `preorders` + anon insert 정책).
+
+> ⚠️ 광고를 태우기 전에 반드시 키를 채울 것. 키가 없으면 아무것도 집계되지 않습니다.
 
 ## 검증 배경
 

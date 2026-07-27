@@ -14,7 +14,7 @@ import { StickyJourney } from "./components/StickyJourney";
 import { useDepthTracking } from "./hooks/useDepthTracking";
 import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 import { useRevealObserver } from "./hooks/useRevealObserver";
-import { captureSrc, track } from "./lib/analytics";
+import { trackOnce } from "./lib/analytics";
 
 export default function App() {
   const reducedMotion = usePrefersReducedMotion();
@@ -23,9 +23,10 @@ export default function App() {
   useRevealObserver(!reducedMotion);
   useDepthTracking();
 
+  // ?src= 는 main.tsx 에서 이미 확정해 뒀다. 여기선 진입만 1회 기록한다.
+  // (StrictMode 가 개발 중 effect 를 두 번 돌려도 중복 전송되지 않게 trackOnce)
   useEffect(() => {
-    captureSrc(); // ?src= 를 세션에 저장 → 이후 모든 이벤트에 붙는다
-    void track("view");
+    trackOnce("view", "view");
   }, []);
 
   return (

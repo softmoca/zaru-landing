@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Header } from "./components/Header";
+import { Hero } from "./components/Hero";
 import { ProgressBar } from "./components/ProgressBar";
 import { StickyJourney } from "./components/StickyJourney";
 import { useDepthTracking } from "./hooks/useDepthTracking";
@@ -28,6 +29,9 @@ export default function App() {
       <Header />
 
       <main id="main">
+        {/* [1] 히어로 */}
+        <Hero />
+
         {/* [5] 4축 스티키 저니 ★ */}
         <StickyJourney />
       </main>

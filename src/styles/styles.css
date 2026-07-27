@@ -148,6 +148,11 @@ input {
   padding-block: clamp(72px, 11vw, 132px);
 }
 
+/* 고정 헤더에 가려지지 않게 */
+[id] {
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
 .section--tight {
   padding-block: clamp(56px, 8vw, 96px);
 }
@@ -322,6 +327,200 @@ input {
 @media (max-width: 768px) {
   .header__tag {
     display: none;
+  }
+}
+
+/* ── 3. [1] 히어로 ────────────────────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-top: calc(var(--header-h) + clamp(32px, 6vw, 76px));
+  padding-bottom: clamp(56px, 9vw, 108px);
+}
+
+/* 크림 위에 세이지가 아주 옅게 퍼지는 정도. 초록으로 화면을 채우지 않는다. */
+.hero__glow {
+  position: absolute;
+  top: -20%;
+  right: -14%;
+  width: min(760px, 92vw);
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(168, 184, 135, 0.34),
+    rgba(248, 243, 232, 0) 68%
+  );
+  pointer-events: none;
+}
+
+.hero__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+  min-height: calc(100svh - var(--header-h) - 72px);
+}
+
+.hero__title {
+  margin: 18px 0 20px;
+}
+
+.hero__sub {
+  max-width: 32ch;
+  font-size: var(--text-lead);
+  color: var(--ink-64);
+}
+
+/* 품목 4개를 2.4초 간격으로 하나씩 들어올린다 (문구는 그대로) */
+.hero__item {
+  display: inline-block;
+  opacity: 0.55;
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out),
+    color 0.5s var(--ease-out);
+}
+
+.hero__item.is-on {
+  opacity: 1;
+  color: var(--olive);
+  transform: translateY(-3px);
+}
+
+.hero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.hero__chip {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--olive-08);
+  color: var(--olive);
+  font-size: 0.9rem;
+  font-weight: var(--weight-bold);
+}
+
+.hero__chip:nth-child(odd) {
+  transform: rotate(-1.5deg);
+}
+
+.hero__chip:nth-child(even) {
+  background: var(--beige);
+  color: var(--forest);
+  transform: rotate(1deg);
+}
+
+.hero__actions {
+  margin-top: clamp(28px, 4vw, 40px);
+}
+
+.hero__note {
+  margin-top: 14px;
+  font-size: 0.88rem;
+  color: var(--ink-40);
+}
+
+.hero__visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* 패럴랙스 — 스크롤 진행률을 그대로 translateY 에 물린다 */
+.hero__phone {
+  transform: translateY(calc(var(--zaru-progress) * 30px));
+}
+
+.hero__phone .phone {
+  height: clamp(430px, 62svh, 560px);
+}
+
+.hero__card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  box-shadow: 0 20px 36px -24px rgba(52, 65, 38, 0.55);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.hero__card b {
+  display: block;
+  color: var(--forest);
+}
+
+.hero__card em {
+  font-style: normal;
+  font-size: 0.92em;
+  color: var(--ink-40);
+}
+
+.hero__card--left {
+  left: -3%;
+  top: 18%;
+  transform: rotate(-3deg) translateY(calc(var(--zaru-progress) * -22px));
+}
+
+.hero__card--right {
+  right: -5%;
+  bottom: 14%;
+  transform: rotate(2.5deg) translateY(calc(var(--zaru-progress) * 25px));
+}
+
+.hero__card-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--coral);
+}
+
+.hero__card-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--olive);
+  color: var(--cream);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 860px) {
+  .hero__grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    min-height: 0;
+  }
+
+  .hero__sub {
+    max-width: none;
+  }
+
+  .hero__br {
+    display: none;
+  }
+
+  .hero__phone .phone {
+    height: clamp(380px, 54svh, 470px);
+  }
+
+  .hero__card--left {
+    left: 0;
+    top: 12%;
+  }
+
+  .hero__card--right {
+    right: 0;
+    bottom: 6%;
   }
 }
 

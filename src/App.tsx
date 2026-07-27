@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Header } from "./components/Header";
 import { ProgressBar } from "./components/ProgressBar";
+import { StickyJourney } from "./components/StickyJourney";
 import { useDepthTracking } from "./hooks/useDepthTracking";
 import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 import { useRevealObserver } from "./hooks/useRevealObserver";
@@ -26,7 +27,10 @@ export default function App() {
       <ProgressBar />
       <Header />
 
-      <main id="main">{/* 섹션은 여기에 순서대로 들어간다 */}</main>
+      <main id="main">
+        {/* [5] 4축 스티키 저니 ★ */}
+        <StickyJourney />
+      </main>
     </>
   );
 }

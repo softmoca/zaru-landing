@@ -13,8 +13,7 @@
      8. [6] 시나리오
      9. [7] 다시 루프  ★
     10. [8] CTA / [9] 푸터
-    11. 반응형 (<=768px)
-
+   모바일(<=768px) 오버라이드는 각 섹션 블록 끝에 바로 붙여둔다.
    규칙: 애니메이션은 transform / opacity 만. prefers-reduced-motion 가드 필수.
    ========================================================================== */
 
@@ -318,4 +317,476 @@ input {
 .header__cta {
   padding: 10px 20px;
   font-size: 0.92rem;
+}
+
+@media (max-width: 768px) {
+  .header__tag {
+    display: none;
+  }
+}
+
+/* ── 7. [5] 4축 스티키 저니 ★ ─────────────────────────────────────────── */
+
+.journey__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  /* align-items:start + sticky = 그리드 영역(행 전체) 안에서 따라붙는다 */
+  align-items: start;
+}
+
+.journey__visual {
+  position: sticky;
+  top: 96px;
+  height: calc(100vh - 120px);
+  height: calc(100svh - 120px);
+  min-height: 420px;
+}
+
+.journey__screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  transition: opacity var(--dur-step) var(--ease-out),
+    transform var(--dur-step) var(--ease-out);
+  pointer-events: none;
+}
+
+.journey__visual[data-active-step="1"] > [data-step="1"],
+.journey__visual[data-active-step="2"] > [data-step="2"],
+.journey__visual[data-active-step="3"] > [data-step="3"],
+.journey__visual[data-active-step="4"] > [data-step="4"] {
+  opacity: 1;
+  transform: none;
+}
+
+.journey__step {
+  position: relative;
+  min-height: 88vh;
+  min-height: 88svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 26px;
+  opacity: 0.26;
+  transform: translateY(25px);
+  transition: opacity var(--dur-step) var(--ease-out),
+    transform var(--dur-step) var(--ease-out);
+}
+
+.journey__step.is-active {
+  opacity: 1;
+  transform: none;
+}
+
+/* 활성 스텝 옆의 올리브 눈금 */
+.journey__step::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(50% - 36px);
+  width: 3px;
+  height: 72px;
+  border-radius: var(--radius-pill);
+  background: var(--olive);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  transition: transform var(--dur-step) var(--ease-out);
+}
+
+.journey__step.is-active::before {
+  transform: scaleY(1);
+}
+
+.journey__step-num {
+  font-size: 0.85rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  color: var(--olive);
+}
+
+.journey__step-title {
+  margin: 8px 0 12px;
+}
+
+.journey__step-body {
+  max-width: 34ch;
+  color: var(--ink-64);
+  font-size: var(--text-lead);
+}
+
+/* 하단 흐름 */
+.flowline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin-top: clamp(40px, 6vw, 76px);
+  padding: 20px clamp(18px, 3vw, 28px);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}
+
+.flowline__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.95rem;
+  font-weight: var(--weight-bold);
+  color: var(--forest);
+}
+
+.flowline__arrow {
+  color: var(--sage);
+}
+
+@media (max-width: 768px) {
+  /* 스티키 완전 해제 — 모바일에서 100svh 스티키는 주소창 때문에 깨진다 */
+  .journey__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .journey__visual {
+    position: relative;
+    top: auto;
+    height: clamp(500px, 68svh, 620px);
+    min-height: 0;
+  }
+
+  .journey__step {
+    min-height: 0;
+    padding: 40px 0 24px;
+    border-top: 1px solid var(--olive-16);
+    opacity: 1;
+    transform: none;
+  }
+
+  .journey__step::before {
+    display: none;
+  }
+
+  .journey__step-body {
+    max-width: none;
+  }
+}
+
+/* ── 목업 (플레이스홀더 — 실제 이미지 나오면 교체) ────────────────────── */
+
+.phone {
+  position: relative;
+  height: min(620px, 100%);
+  aspect-ratio: 300 / 620;
+  padding: 11px;
+  border-radius: 42px;
+  background: var(--forest);
+  box-shadow: 0 34px 60px -34px rgba(52, 65, 38, 0.6);
+}
+
+.phone__notch {
+  position: absolute;
+  top: 17px;
+  left: 50%;
+  z-index: 2;
+  width: 68px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: rgba(248, 243, 232, 0.35);
+  transform: translateX(-50%);
+}
+
+.phone__screen {
+  height: 100%;
+  border-radius: 32px;
+  background: var(--cream);
+  overflow: hidden;
+}
+
+.scr {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85em;
+  height: 100%;
+  padding: 2.4em 1.5em 1.6em;
+  font-size: clamp(11px, 1.45vh, 14px);
+  line-height: 1.4;
+}
+
+.scr__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85em;
+  color: var(--ink-40);
+}
+
+.scr__brand {
+  font-weight: var(--weight-bold);
+  color: var(--olive);
+}
+
+.scr__title {
+  font-size: 1.5em;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.03em;
+  color: var(--forest);
+}
+
+.scr__list,
+.scr__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+.scr__row,
+.scr__card {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.85em 0.9em;
+  border-radius: 14px;
+  background: var(--white);
+}
+
+.scr__row--now {
+  background: var(--olive);
+}
+
+.scr__check {
+  flex: none;
+  width: 1.3em;
+  height: 1.3em;
+  border: 2px solid var(--olive-28);
+  border-radius: 7px;
+}
+
+.scr__row--now .scr__check {
+  border-color: var(--mustard);
+  background: var(--mustard);
+}
+
+.scr__texts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  flex: 1;
+  min-width: 0;
+}
+
+.scr__label {
+  font-size: 0.72em;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.1em;
+  color: var(--olive);
+}
+
+.scr__task {
+  font-weight: var(--weight-bold);
+  color: var(--forest);
+}
+
+.scr__meta {
+  font-size: 0.76em;
+  color: var(--ink-40);
+}
+
+.scr__due {
+  font-size: 0.78em;
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+  color: var(--ink-40);
+}
+
+.scr__row--now .scr__label,
+.scr__row--now .scr__due {
+  color: var(--mustard);
+}
+
+.scr__row--now .scr__task {
+  color: var(--cream);
+}
+
+.scr__row--now .scr__meta {
+  color: rgba(248, 243, 232, 0.7);
+}
+
+/* 자루 픽 */
+.scr__tabs {
+  display: flex;
+  gap: 0.4em;
+  padding: 0.3em;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+}
+
+.scr__tab {
+  flex: 1;
+  padding: 0.45em 0;
+  border-radius: var(--radius-pill);
+  font-size: 0.8em;
+  font-weight: var(--weight-bold);
+  text-align: center;
+  color: var(--ink-40);
+}
+
+.scr__tab.is-on {
+  background: var(--olive);
+  color: var(--cream);
+}
+
+.scr__thumb {
+  flex: none;
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: 10px;
+  background: var(--beige);
+}
+
+.scr__gauge {
+  margin-top: 0.35em;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--olive-08);
+  overflow: hidden;
+}
+
+.scr__gauge-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--sage);
+  transform-origin: 0 50%;
+}
+
+/* 완료 기록 캘린더 */
+.scr__week,
+.scr__cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3em;
+}
+
+.scr__weekday {
+  font-size: 0.68em;
+  text-align: center;
+  color: var(--ink-40);
+}
+
+.scr__day {
+  position: relative;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-size: 0.72em;
+  color: var(--ink-40);
+  transition: color 0.3s var(--ease-out);
+}
+
+/* 도장 — 스텝 04가 활성일 때 순서대로 찍힌다 */
+.scr__day.is-stamped::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--olive);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.36s var(--ease-out), transform 0.36s var(--ease-out);
+}
+
+.journey__visual[data-active-step="4"] .scr__day.is-stamped {
+  color: var(--cream);
+  transition-delay: calc(var(--i) * 55ms + 140ms);
+}
+
+.journey__visual[data-active-step="4"] .scr__day.is-stamped::before {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: calc(var(--i) * 55ms + 140ms);
+}
+
+.scr__foot {
+  margin-top: auto;
+  font-size: 0.8em;
+  color: var(--ink-40);
+}
+
+.scr__foot-num {
+  font-weight: var(--weight-bold);
+  color: var(--olive);
+}
+
+/* 03 정보 조립소 — 폰 목업 대신 정적 카드 (톤 한 단계 낮춤) */
+.infocard {
+  max-width: 360px;
+  padding: clamp(26px, 3vw, 34px);
+  border-radius: var(--radius-lg);
+  background: var(--beige);
+  transform: rotate(-1.2deg);
+}
+
+.infocard__label {
+  font-size: var(--text-eyebrow);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  color: var(--olive);
+}
+
+.infocard__title {
+  margin: 10px 0 18px;
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.03em;
+  color: var(--forest);
+}
+
+.infocard__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--ink-64);
+}
+
+.infocard__lines li {
+  padding-left: 16px;
+  position: relative;
+}
+
+.infocard__lines li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.infocard__foot {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(52, 65, 38, 0.14);
+  font-size: 0.85rem;
+  color: var(--ink-40);
+}
+
+@media (max-width: 768px) {
+  /* 모바일에선 비주얼이 스텝 04까지 따라가지 않으니 도장을 처음부터 찍어둔다 */
+  .scr__day.is-stamped {
+    color: var(--cream);
+  }
+  .scr__day.is-stamped::before {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

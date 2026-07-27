@@ -3,7 +3,7 @@ import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import { useScrollProgress } from "../hooks/useScrollProgress";
 import { revealDelay } from "../lib/style";
 import { PhoneFrame } from "./mockups/PhoneFrame";
-import { ScreenRoutine } from "./mockups/ScreenRoutine";
+import { MOCKUPS } from "./mockups/mockups";
 
 /* [1] 히어로
    - 스크롤 진행률 --zaru-progress 를 CSS 변수로 흘려 패럴랙스 (폰 +30px / 좌 -22px / 우 +25px)
@@ -77,14 +77,14 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="hero__visual" aria-hidden="true">
+        {/* 캡처는 alt 로 읽히고, 주변 카드만 장식이라 따로 숨긴다 */}
+        <div className="hero__visual">
           <div className="hero__phone">
-            <PhoneFrame>
-              <ScreenRoutine />
-            </PhoneFrame>
+            {/* 첫 화면에 바로 보이므로 유일하게 eager */}
+            <PhoneFrame {...MOCKUPS.home} priority />
           </div>
 
-          <div className="hero__card hero__card--left">
+          <div className="hero__card hero__card--left" aria-hidden="true">
             <span className="hero__card-dot" />
             <span>
               <b>배수구 청소</b>
@@ -92,7 +92,7 @@ export function Hero() {
             </span>
           </div>
 
-          <div className="hero__card hero__card--right">
+          <div className="hero__card hero__card--right" aria-hidden="true">
             <span className="hero__card-check">✓</span>
             <span>
               <b>이불 빨래</b>

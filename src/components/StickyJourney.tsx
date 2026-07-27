@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { trackOnce } from "../lib/analytics";
-import { InfoCard } from "./mockups/InfoCard";
 import { PhoneFrame } from "./mockups/PhoneFrame";
-import { ScreenPicks } from "./mockups/ScreenPicks";
-import { ScreenRecord } from "./mockups/ScreenRecord";
-import { ScreenRoutine } from "./mockups/ScreenRoutine";
+import { MOCKUPS } from "./mockups/mockups";
 
 /* [5] 핵심 기능 4축 — ★ 스티키 저니 (이 페이지의 메인 이벤트)
 
@@ -95,29 +92,18 @@ export function StickyJourney() {
         </header>
 
         <div className="journey__grid">
-          {/* 비주얼은 설명을 보조하는 그림이라 보조기기에는 숨긴다. */}
-          <div
-            className="journey__visual"
-            data-active-step={active}
-            aria-hidden="true"
-          >
+          <div className="journey__visual" data-active-step={active}>
             <div className="journey__screen" data-step="1">
-              <PhoneFrame>
-                <ScreenRoutine />
-              </PhoneFrame>
+              <PhoneFrame {...MOCKUPS.home} />
             </div>
             <div className="journey__screen" data-step="2">
-              <PhoneFrame>
-                <ScreenPicks />
-              </PhoneFrame>
+              <PhoneFrame {...MOCKUPS.supplies} />
             </div>
-            <div className="journey__screen journey__screen--flat" data-step="3">
-              <InfoCard />
+            <div className="journey__screen" data-step="3">
+              <PhoneFrame {...MOCKUPS.assembly} />
             </div>
             <div className="journey__screen" data-step="4">
-              <PhoneFrame>
-                <ScreenRecord />
-              </PhoneFrame>
+              <PhoneFrame {...MOCKUPS.my} />
             </div>
           </div>
 

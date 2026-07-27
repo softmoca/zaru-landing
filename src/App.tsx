@@ -1,8 +1,15 @@
 import { useEffect } from "react";
+import { About } from "./components/About";
+import { Empathy } from "./components/Empathy";
+import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { LoopSection } from "./components/LoopSection";
+import { Marquee } from "./components/Marquee";
+import { Preorder } from "./components/Preorder";
+import { Problems } from "./components/Problems";
 import { ProgressBar } from "./components/ProgressBar";
+import { Scenario } from "./components/Scenario";
 import { StickyJourney } from "./components/StickyJourney";
 import { useDepthTracking } from "./hooks/useDepthTracking";
 import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
@@ -30,15 +37,18 @@ export default function App() {
       <Header />
 
       <main id="main">
-        {/* [1] 히어로 */}
-        <Hero />
-
-        {/* [5] 4축 스티키 저니 ★ */}
-        <StickyJourney />
-
-        {/* [7] 다시 루프 ★ */}
-        <LoopSection />
+        <Hero /> {/* [1] */}
+        <Empathy /> {/* [2] */}
+        <Marquee /> {/* [2.5] */}
+        <Problems /> {/* [3] */}
+        <About /> {/* [4] */}
+        <StickyJourney /> {/* [5] ★ 스티키 저니 */}
+        <Scenario /> {/* [6] */}
+        <LoopSection /> {/* [7] ★ 원형 시퀀스 */}
+        <Preorder /> {/* [8] */}
       </main>
+
+      <Footer /> {/* [9] */}
     </>
   );
 }

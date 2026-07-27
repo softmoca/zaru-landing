@@ -335,8 +335,8 @@ input {
 .hero {
   position: relative;
   overflow: hidden;
-  padding-top: calc(var(--header-h) + clamp(32px, 6vw, 76px));
-  padding-bottom: clamp(56px, 9vw, 108px);
+  padding-top: var(--header-h);
+  padding-bottom: clamp(40px, 6vw, 80px);
 }
 
 /* 크림 위에 세이지가 아주 옅게 퍼지는 정도. 초록으로 화면을 채우지 않는다. */
@@ -360,7 +360,8 @@ input {
   grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
   gap: clamp(32px, 5vw, 64px);
   align-items: center;
-  min-height: calc(100svh - var(--header-h) - 72px);
+  /* 헤더 + 아래 여백을 뺀 나머지를 꽉 채워 첫 화면이 딱 한 장이 되게 */
+  min-height: calc(100svh - var(--header-h) - clamp(40px, 6vw, 80px));
 }
 
 .hero__title {
@@ -513,15 +514,263 @@ input {
     height: clamp(380px, 54svh, 470px);
   }
 
+  /* 좁은 화면에선 카드가 폰 내용을 가리지 않게 프레임 모서리로 물린다 */
+  .hero__card {
+    padding: 10px 13px;
+    font-size: 0.78rem;
+  }
+
   .hero__card--left {
     left: 0;
-    top: 12%;
+    top: -14px;
   }
 
   .hero__card--right {
     right: 0;
-    bottom: 6%;
+    bottom: -10px;
   }
+}
+
+/* ── 4. [2] 공감 / [2.5] 마퀴 ─────────────────────────────────────────── */
+
+.empathy__inner {
+  max-width: 880px;
+}
+
+.empathy__q {
+  font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.6rem);
+  line-height: 1.4;
+}
+
+/* 형광 밑줄 — 페이지 전체에서 여기 한 번만 쓴다 */
+.mark {
+  position: relative;
+  z-index: 0;
+  display: inline-block;
+}
+
+.mark::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -4px;
+  right: -4px;
+  bottom: 2px;
+  height: 0.44em;
+  border-radius: 4px;
+  background: var(--mustard);
+  opacity: 0.9;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.55s var(--ease-out) 0.25s;
+}
+
+.reveal.is-visible .mark::after {
+  transform: scaleX(1);
+}
+
+.empathy__sub {
+  margin-top: 20px;
+  max-width: 46ch;
+}
+
+.empathy__bubbles {
+  display: grid;
+  gap: 14px;
+  max-width: 640px;
+  margin-top: clamp(32px, 5vw, 52px);
+}
+
+.bubble {
+  padding: 22px 26px;
+  border-radius: 22px 22px 22px 6px;
+  background: var(--white);
+  color: var(--forest);
+  font-size: var(--text-lead);
+  font-weight: var(--weight-bold);
+}
+
+.bubble--plain {
+  justify-self: end;
+  border-radius: 22px 22px 6px 22px;
+  background: var(--beige);
+  color: var(--ink);
+  font-weight: var(--weight-body);
+}
+
+.empathy__punch {
+  margin-top: clamp(36px, 5vw, 60px);
+  font-size: clamp(1.4rem, 1rem + 1.8vw, 2.15rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.03em;
+  line-height: 1.36;
+  color: var(--forest);
+}
+
+/* 마퀴 — 딥 포레스트 배경 + 올리브 점, 20초 무한 루프 */
+.marquee {
+  overflow: hidden;
+  padding-block: 12px;
+  margin-block: clamp(40px, 6vw, 76px);
+}
+
+.marquee__viewport {
+  display: flex;
+  /* 회전 때문에 생기는 양끝 삼각형 여백을 없애려고 폭을 조금 넘긴다 */
+  width: 108%;
+  margin-left: -4%;
+  padding-block: 16px;
+  background: var(--forest);
+  transform: rotate(-1.2deg);
+}
+
+.marquee__track {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 26px;
+  padding-right: 26px;
+  white-space: nowrap;
+  animation: marquee-scroll 20s linear infinite;
+}
+
+.marquee__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 26px;
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.3rem);
+  font-weight: var(--weight-bold);
+  color: var(--cream);
+}
+
+.marquee__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--olive);
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* ── 5. [3] 문제 3카드 ────────────────────────────────────────────────── */
+
+.problems__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2.5vw, 26px);
+}
+
+.problem {
+  padding: clamp(26px, 3vw, 36px);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}
+
+.problem__num {
+  font-size: 0.85rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  color: var(--olive);
+}
+
+.problem__title {
+  margin: 10px 0 12px;
+}
+
+.problem__body {
+  color: var(--ink-64);
+}
+
+/* 미룬다 → 주기 감각이 흐려진다 → 결국 포기한다 */
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+.chain__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: var(--weight-bold);
+  color: var(--forest);
+}
+
+.chain__arrow,
+.chain__text {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+  transition-delay: calc(var(--i) * 0.18s);
+}
+
+.chain__arrow {
+  color: var(--sage);
+  transform: translateX(-6px);
+}
+
+.chain.is-visible .chain__arrow,
+.chain.is-visible .chain__text {
+  opacity: 1;
+  transform: none;
+}
+
+.chain__text--muted {
+  color: var(--ink-40);
+}
+
+@media (max-width: 860px) {
+  .problems__cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 6. [4] 자루 소개 ─────────────────────────────────────────────────── */
+
+/* 인터랙션을 일부러 죽인 구간. 배경만 크림 → 화이트로 넘어간다. */
+.about {
+  background: var(--cream);
+  text-align: center;
+  transition: background-color 0.8s var(--ease-out);
+}
+
+.about.is-lit {
+  background: var(--white);
+}
+
+.about__inner {
+  max-width: 720px;
+}
+
+.about__name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 18px 0 22px;
+  font-size: var(--text-display);
+  color: var(--olive);
+}
+
+.about__claim {
+  margin-bottom: 18px;
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  color: var(--forest);
+}
+
+.about__desc {
+  max-width: 46ch;
+  margin-inline: auto;
 }
 
 /* ── 7. [5] 4축 스티키 저니 ★ ─────────────────────────────────────────── */
@@ -735,6 +984,11 @@ input {
   color: var(--forest);
 }
 
+.scr__title--sm {
+  margin-top: 0.4em;
+  font-size: 1.05em;
+}
+
 .scr__list,
 .scr__cards {
   display: flex;
@@ -754,6 +1008,18 @@ input {
 
 .scr__row--now {
   background: var(--olive);
+}
+
+.scr__row--slim {
+  padding: 0.65em 0.9em;
+}
+
+.scr__pin {
+  flex: none;
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 50%;
+  background: var(--sage);
 }
 
 .scr__check {
@@ -987,6 +1253,61 @@ input {
   .scr__day.is-stamped::before {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* ── 8. [6] 시나리오 ──────────────────────────────────────────────────── */
+
+.beats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 1.5vw, 18px);
+}
+
+.beats__item {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(8px, 1.2vw, 16px);
+}
+
+.beats__arrow {
+  flex: none;
+  align-self: center;
+  color: var(--sage);
+}
+
+.beat {
+  flex: 1;
+  padding: clamp(22px, 2.6vw, 32px);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}
+
+.beat__mark {
+  font-size: 1.3rem;
+  font-weight: var(--weight-bold);
+  color: var(--olive);
+}
+
+.beat__text {
+  margin-top: 10px;
+  color: var(--ink-64);
+}
+
+.scenario__note {
+  margin-top: clamp(24px, 3vw, 36px);
+  font-weight: var(--weight-bold);
+  color: var(--olive);
+}
+
+@media (max-width: 860px) {
+  .beats {
+    grid-template-columns: 1fr;
+  }
+
+  /* 세로로 쌓이면 순서가 그 자체로 읽히니 화살표는 뺀다 */
+  .beats__arrow {
+    display: none;
   }
 }
 
@@ -1268,5 +1589,191 @@ input {
   .loop.is-drawn .loop__badge[data-on] .loop__badge-num {
     background: rgba(248, 243, 232, 0.24);
     color: var(--cream);
+  }
+}
+
+/* ── 10. [8] 사전예약 CTA / [9] 푸터 ──────────────────────────────────── */
+
+.preorder__inner {
+  padding: clamp(40px, 6vw, 84px) clamp(24px, 4vw, 64px);
+  border-radius: 32px;
+  background: var(--forest);
+  color: var(--cream);
+  text-align: center;
+}
+
+.preorder__inner h2 {
+  color: var(--cream);
+}
+
+.preorder__sub {
+  margin-top: 18px;
+  color: rgba(248, 243, 232, 0.74);
+}
+
+/* 모달 없이 인라인 입력 */
+.preorder__form {
+  display: flex;
+  gap: 10px;
+  max-width: 520px;
+  margin: clamp(28px, 4vw, 40px) auto 0;
+}
+
+.preorder__input {
+  flex: 1;
+  min-width: 0;
+  padding: 15px 22px;
+  border: 1px solid rgba(248, 243, 232, 0.28);
+  border-radius: var(--radius-pill);
+  background: rgba(248, 243, 232, 0.08);
+  color: var(--cream);
+}
+
+.preorder__input::placeholder {
+  color: rgba(248, 243, 232, 0.5);
+}
+
+.preorder__input:focus-visible {
+  outline-color: var(--mustard);
+}
+
+/* 전환 지점이라 포인트 컬러(머스터드)를 여기 한 번 쓴다 */
+.preorder__submit {
+  flex: none;
+  background: var(--mustard);
+  color: var(--forest);
+}
+
+.preorder__submit:hover {
+  background: var(--white);
+}
+
+.preorder__done {
+  max-width: 520px;
+  margin: clamp(28px, 4vw, 40px) auto 0;
+  padding: 18px 24px;
+  border-radius: var(--radius-pill);
+  background: rgba(248, 243, 232, 0.12);
+  font-weight: var(--weight-bold);
+  color: var(--cream);
+}
+
+.preorder__error {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  font-weight: var(--weight-bold);
+  color: var(--coral);
+}
+
+.preorder__kakao {
+  margin-top: 18px;
+}
+
+.preorder__kakao .btn--ghost {
+  border-color: rgba(248, 243, 232, 0.3);
+  color: var(--cream);
+}
+
+.preorder__kakao .btn--ghost:hover {
+  border-color: var(--cream);
+  background: rgba(248, 243, 232, 0.1);
+}
+
+.preorder__note {
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: rgba(248, 243, 232, 0.6);
+}
+
+.footer {
+  padding-block: clamp(40px, 6vw, 68px);
+  background: var(--forest);
+  color: rgba(248, 243, 232, 0.72);
+}
+
+.footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.footer__brand {
+  /* 진한 배경 위라 자루 심볼 안쪽 체크는 딥 포레스트로 뒤집는다 */
+  --mark-check: var(--forest);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cream);
+  font-weight: var(--weight-bold);
+}
+
+.footer__divider {
+  opacity: 0.4;
+}
+
+.footer__line {
+  margin-top: 8px;
+  font-size: 0.92rem;
+}
+
+.footer__closing {
+  font-size: 0.92rem;
+  color: var(--sage);
+}
+
+@media (max-width: 560px) {
+  .preorder__form {
+    flex-direction: column;
+  }
+}
+
+/* ── 11. 모션 최소화 ─────────────────────────────────────────────────────
+   전환을 끄고 "다 끝난 상태"로 바로 보여준다. 정보는 하나도 잃지 않게. */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .reveal,
+  .journey__step,
+  .loop__badge,
+  .chain__arrow,
+  .chain__text,
+  .beats__arrow {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .mark::after {
+    transform: scaleX(1) !important;
+  }
+
+  .marquee__track {
+    animation: none !important;
+  }
+
+  .scr__day.is-stamped {
+    color: var(--cream);
+  }
+
+  .scr__day.is-stamped::before {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .loop__circle::after {
+    transform: scaleY(1) !important;
   }
 }

@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 const WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"];
 const DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
 const STAMPED = new Set([2, 5, 8, 9, 13, 16, 19, 20, 23, 26, 27]);
+const SAVED_TIPS = ["물때 없애는 순서", "이불 세탁 주기"];
 
 export function ScreenRecord() {
   let stampIndex = 0;
@@ -42,6 +43,17 @@ export function ScreenRecord() {
           );
         })}
       </div>
+
+      <p className="scr__title scr__title--sm">저장한 팁</p>
+
+      <ul className="scr__list">
+        {SAVED_TIPS.map((tip) => (
+          <li key={tip} className="scr__row scr__row--slim">
+            <span className="scr__pin" />
+            <span className="scr__task">{tip}</span>
+          </li>
+        ))}
+      </ul>
 
       <p className="scr__foot">
         <span className="scr__foot-num num">11</span>번 완료했어요

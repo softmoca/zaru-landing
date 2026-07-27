@@ -5,6 +5,7 @@ const TABS = ["직접", "용품", "서비스"];
 const PICKS = [
   { name: "배수구 세정 타블렛", note: "월 1회 · 5분", bar: 0.82 },
   { name: "욕실 곰팡이 제거제", note: "분기 1회 · 20분", bar: 0.64 },
+  { name: "타일 줄눈 브러시", note: "월 1회 · 15분", bar: 0.55 },
   { name: "출장 청소 서비스", note: "반기 1회 · 2시간", bar: 0.41 },
 ];
 
@@ -41,6 +42,8 @@ export function ScreenPicks() {
           </li>
         ))}
       </ul>
+
+      <p className="scr__foot">직접 · 용품 · 서비스를 한 화면에서</p>
     </div>
   );
 }

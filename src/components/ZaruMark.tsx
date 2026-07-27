@@ -28,7 +28,7 @@ export function ZaruMark({ size = 26, className }: Props) {
       />
       <path
         d="m9.6 14.6 1.9 1.9 3.5-3.6"
-        stroke="var(--cream)"
+        stroke="var(--mark-check, var(--cream))"
         strokeWidth="1.9"
         strokeLinecap="round"
         strokeLinejoin="round"

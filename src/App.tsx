@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
+import { LoopSection } from "./components/LoopSection";
 import { ProgressBar } from "./components/ProgressBar";
 import { StickyJourney } from "./components/StickyJourney";
 import { useDepthTracking } from "./hooks/useDepthTracking";
@@ -34,6 +35,9 @@ export default function App() {
 
         {/* [5] 4축 스티키 저니 ★ */}
         <StickyJourney />
+
+        {/* [7] 다시 루프 ★ */}
+        <LoopSection />
       </main>
     </>
   );

@@ -8,6 +8,9 @@ interface Options {
   /** 진행률이 갱신될 때마다 호출. 리렌더가 필요하면 여기서 "좁게" 갱신할 것. */
   onProgress?: (progress: number) => void;
   enabled?: boolean;
+  /** enabled 가 false 일 때 고정할 값. 모션 최소화/모바일에서 "완성된 상태"로
+   *  보여줘야 하는 연출은 1 을 준다. */
+  disabledValue?: number;
 }
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
@@ -22,6 +25,7 @@ export function useScrollProgress<T extends HTMLElement>({
   span,
   onProgress,
   enabled = true,
+  disabledValue = 0,
 }: Options = {}): RefObject<T> {
   const ref = useRef<T>(null);
   const onProgressRef = useRef(onProgress);
@@ -32,8 +36,8 @@ export function useScrollProgress<T extends HTMLElement>({
     if (!el) return;
 
     if (!enabled) {
-      el.style.setProperty(varName, "0");
-      onProgressRef.current?.(0);
+      el.style.setProperty(varName, String(disabledValue));
+      onProgressRef.current?.(disabledValue);
       return;
     }
 
@@ -66,7 +70,7 @@ export function useScrollProgress<T extends HTMLElement>({
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, [varName, span, enabled]);
+  }, [varName, span, enabled, disabledValue]);
 
   return ref;
 }

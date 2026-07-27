@@ -989,3 +989,284 @@ input {
     transform: scale(1);
   }
 }
+
+/* ── 9. [7] 다시 루프 ★ ───────────────────────────────────────────────── */
+
+/* 트랙을 길게 잡고 안쪽을 고정 → 그 스크롤 구간이 그대로 원의 진행률이 된다 */
+.loop {
+  position: relative;
+  min-height: 220vh;
+  min-height: 220svh;
+}
+
+.loop__sticky {
+  position: sticky;
+  top: var(--header-h);
+  display: flex;
+  align-items: center;
+  height: calc(100vh - var(--header-h));
+  height: calc(100svh - var(--header-h));
+}
+
+.loop__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+  width: 100%;
+}
+
+.loop__figure {
+  display: flex;
+  justify-content: center;
+}
+
+.loop__circle {
+  position: relative;
+  width: min(380px, 74%);
+  aspect-ratio: 1;
+}
+
+.loop__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.loop__track {
+  fill: none;
+  stroke: var(--olive-16);
+  stroke-width: 2;
+  transition: stroke 0.5s var(--ease-out);
+}
+
+/* pathLength=1 로 잡아 두면 진행률을 그대로 dashoffset 에 쓸 수 있다 */
+.loop__arc {
+  fill: none;
+  stroke: var(--olive);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--loop-progress));
+  transform: rotate(-90deg);
+  transform-box: view-box;
+  transform-origin: 160px 160px;
+}
+
+/* 호 끝을 따라 도는 점 */
+.loop__head {
+  fill: var(--mustard);
+  opacity: calc(var(--loop-progress) * 4);
+  transform: rotate(calc(var(--loop-progress) * 360deg));
+  transform-box: view-box;
+  transform-origin: 160px 160px;
+}
+
+/* 원이 닫히면 궤도 자체가 한 톤 진해진다 */
+.loop.is-closed .loop__track {
+  stroke: var(--olive-28);
+}
+
+.loop__badges {
+  position: absolute;
+  inset: 0;
+}
+
+.loop__slot {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+}
+
+.loop__slot--0 {
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%);
+}
+.loop__slot--1 {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+.loop__slot--2 {
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+.loop__slot--3 {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.loop__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--ink-40);
+  font-size: 0.9rem;
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+  box-shadow: 0 12px 28px -20px rgba(52, 65, 38, 0.7);
+  opacity: 0.34;
+  transform: scale(0.94);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out),
+    background-color 0.45s var(--ease-out), color 0.45s var(--ease-out);
+}
+
+.loop__badge[data-on="true"] {
+  opacity: 1;
+  transform: none;
+  background: var(--olive);
+  color: var(--cream);
+}
+
+.loop__badge-num {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--olive-08);
+  color: var(--olive);
+  font-size: 0.7rem;
+}
+
+.loop__badge[data-on="true"] .loop__badge-num {
+  background: rgba(248, 243, 232, 0.24);
+  color: var(--cream);
+}
+
+.loop__title {
+  margin: 16px 0 18px;
+}
+
+.loop__desc {
+  max-width: 40ch;
+}
+
+.loop__count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: clamp(24px, 3vw, 36px);
+  padding-top: 22px;
+  border-top: 1px solid var(--olive-16);
+}
+
+.loop__count-label {
+  font-size: 0.95rem;
+  color: var(--ink-40);
+}
+
+.loop__count-num {
+  font-size: clamp(2.6rem, 1.5rem + 3vw, 4rem);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  color: var(--olive);
+}
+
+.loop__count-unit {
+  font-weight: var(--weight-bold);
+  color: var(--olive);
+}
+
+@media (max-width: 768px) {
+  /* 원형 → 세로 타임라인. 스티키/스크롤 연동은 아예 끈다. */
+  .loop {
+    min-height: 0;
+    padding-block: clamp(72px, 11vw, 132px);
+  }
+
+  .loop__sticky {
+    position: static;
+    display: block;
+    height: auto;
+  }
+
+  .loop__grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .loop__copy {
+    order: -1;
+  }
+
+  .loop__figure {
+    justify-content: stretch;
+  }
+
+  .loop__circle {
+    width: 100%;
+    aspect-ratio: auto;
+    padding-left: 26px;
+  }
+
+  .loop__svg {
+    display: none;
+  }
+
+  /* 세로선 — 회색 궤도 위에 올리브가 위에서 아래로 그려진다 */
+  .loop__circle::before,
+  .loop__circle::after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    border-radius: var(--radius-pill);
+  }
+
+  .loop__circle::before {
+    background: var(--olive-16);
+  }
+
+  .loop__circle::after {
+    background: var(--olive);
+    transform: scaleY(0);
+    transform-origin: 50% 0;
+    transition: transform 1.3s var(--ease-out);
+  }
+
+  .loop.is-drawn .loop__circle::after {
+    transform: scaleY(1);
+  }
+
+  .loop__badges {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .loop__slot {
+    position: static;
+    transform: none;
+    justify-content: flex-start;
+  }
+
+  .loop__badge[data-on] {
+    opacity: 0.28;
+    transform: translateY(12px);
+    background: var(--white);
+    color: var(--ink-40);
+    transition-delay: calc(var(--i) * 0.3s);
+  }
+
+  .loop.is-drawn .loop__badge[data-on] {
+    opacity: 1;
+    transform: none;
+    background: var(--olive);
+    color: var(--cream);
+  }
+
+  .loop.is-drawn .loop__badge[data-on] .loop__badge-num {
+    background: rgba(248, 243, 232, 0.24);
+    color: var(--cream);
+  }
+}

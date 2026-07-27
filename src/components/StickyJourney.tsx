@@ -91,7 +91,6 @@ export function StickyJourney() {
     <section className="section journey" id="features" aria-labelledby="journey-title">
       <div className="shell">
         <header className="section-title reveal">
-          <p className="eyebrow">핵심 기능</p>
           <h2 id="journey-title">자루의 네 가지 축</h2>
         </header>
 

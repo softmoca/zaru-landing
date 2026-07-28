@@ -482,10 +482,34 @@ input {
   color: var(--ink-40);
 }
 
+/* 왼쪽 카드만 한 단계 키운다 — "몰라서 놓치는 것"의 예시라 먼저 읽혀야 한다 */
 .hero__card--left {
-  left: -3%;
+  left: -8%;
   top: 18%;
+  padding: 14px 20px;
+  border: 1px solid rgba(216, 121, 95, 0.28);
+  box-shadow: 0 24px 40px -22px rgba(216, 121, 95, 0.6);
+  font-size: 0.92rem;
   transform: rotate(-3deg) translateY(calc(var(--zaru-progress) * -22px));
+}
+
+.hero__card--left .hero__card-dot {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 4px rgba(216, 121, 95, 0.16);
+  animation: card-dot-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes card-dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.7;
+  }
 }
 
 .hero__card--right {
@@ -542,6 +566,8 @@ input {
   .hero__card--left {
     left: 0;
     top: -14px;
+    padding: 11px 15px;
+    font-size: 0.84rem;
   }
 
   .hero__card--right {

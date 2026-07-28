@@ -10,7 +10,7 @@ import { MOCKUPS } from "./mockups/mockups";
    - 서브의 품목 4개는 2.4초 간격으로 하나씩 슬라이드업 강조 (문구는 그대로 둔 채 강조만 이동) */
 
 const ITEMS = ["화장실", "배수구", "이불", "에어컨 필터"];
-const CHIPS = ["#화장실", "#배수구", "#이불"];
+const CHIPS = ["#화장실", "#배수구", "#이불", "#지원금"];
 const ROTATE_MS = 2400;
 
 export function Hero() {
@@ -93,10 +93,11 @@ export function Hero() {
             <PhoneFrame {...MOCKUPS.home} priority />
           </div>
 
+          {/* 히어로에서 가장 먼저 읽혀야 하는 카드 — 강조 한 줄의 "지원금"을 받는다 */}
           <div className="hero__card hero__card--left" aria-hidden="true">
             <span className="hero__card-dot" />
             <span>
-              <b>배수구 청소</b>
+              <b>월세 지원금 신청</b>
               <em>오늘 알림 도착</em>
             </span>
           </div>

@@ -41,7 +41,9 @@ export function Preorder() {
     <section className="section preorder" id="preorder" aria-labelledby="preorder-title">
       <div className="shell preorder__inner">
         <h2 className="reveal" id="preorder-title">
-          비우는 루틴, 누리는 당신
+          놓치는 자취 살림,
+          <br />
+          자루가 대신 기억해요
         </h2>
 
         <p className="lead preorder__sub reveal">

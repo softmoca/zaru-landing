@@ -23,13 +23,25 @@ export function Hero() {
             떠나는 날까지
           </h1>
 
-          <p className="hero__sub reveal" style={revealDelay(160)}>
+          <div className="hero__support-question reveal" style={revealDelay(160)}>
+            <h2>
+              이 집, 계약해도
+              <br />
+              지원금 받을 수 있을까요?
+            </h2>
+            <p>
+              나의 조건만 보는 것이 아니라 지역·보증금·월세·전입신고 조건까지
+              함께 확인해, 계약 전에 알아볼 지원과 준비할 일을 알려드려요.
+            </p>
+          </div>
+
+          <p className="hero__sub reveal" style={revealDelay(240)}>
             지금 확인할 것, 해야 할 일, 남겨둘 기록을
             <br />
             먼저 살아본 선배처럼 순서대로 알려드릴게요.
           </p>
 
-          <ul className="hero__chips reveal" style={revealDelay(260)}>
+          <ul className="hero__chips reveal" style={revealDelay(320)}>
             {CHIPS.map((chip) => (
               <li key={chip} className="hero__chip">
                 {chip}
@@ -37,7 +49,7 @@ export function Hero() {
             ))}
           </ul>
 
-          <div className="hero__actions reveal" style={revealDelay(340)}>
+          <div className="hero__actions reveal" style={revealDelay(400)}>
             <a className="btn btn--primary" href="#problem">
               우리가 해결하려는 문제 보기
             </a>

@@ -311,6 +311,26 @@ button:focus-visible {
   font-size: var(--text-h1);
 }
 
+.hero__support-question {
+  max-width: 680px;
+  margin-bottom: 24px;
+  border-left: 3px solid var(--coral);
+  padding: 4px 0 4px 20px;
+}
+
+.hero__support-question h2 {
+  margin-bottom: 12px;
+  font-size: clamp(1.45rem, 1.16rem + 0.9vw, 2rem);
+  line-height: 1.3;
+}
+
+.hero__support-question p {
+  margin: 0;
+  color: var(--forest-72);
+  font-size: 0.9rem;
+  line-height: 1.72;
+}
+
 .hero__sub {
   margin-bottom: 26px;
   color: var(--forest-72);
@@ -1604,6 +1624,18 @@ button:focus-visible {
 
   .hero__sub br {
     display: none;
+  }
+
+  .hero__support-question {
+    padding-left: 16px;
+  }
+
+  .hero__support-question h2 {
+    font-size: 1.42rem;
+  }
+
+  .hero__support-question p {
+    font-size: 0.82rem;
   }
 
   .hero__actions {

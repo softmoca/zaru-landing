@@ -17,15 +17,26 @@ export type HousingKnowledge =
   | "evidenceRequired"
   | "none";
 
+export type HousingBenefitHistory =
+  | "nationalRentCurrent"
+  | "nationalRentEnded"
+  | "seoulRentCurrent"
+  | "seoulRentEnded"
+  | "otherRentCurrent"
+  | "otherRentEnded"
+  | "depositInterest"
+  | "movingBrokerage"
+  | "none";
+
 export interface PersonalProfile {
   awareness: AwarenessLevel;
   housingKnowledge: HousingKnowledge[];
-  ageBand: "national" | "localOnly" | "outside" | "unknown";
+  ageBand: "unselected" | "national" | "localOnly" | "outside";
   separateFromParents: Answer;
   homeOwnership: Answer;
   incomeCheck: "within" | "outside" | "unknown";
   employment: "employed" | "startup" | "jobseeker" | "student" | "other" | "unknown";
-  previousSupport: Answer;
+  benefitHistory: HousingBenefitHistory[];
 }
 
 export interface CandidateHome {
@@ -76,6 +87,7 @@ export interface PrototypeResult {
   description: string;
   awarenessLabel: string;
   knowledgeLabels: string[];
+  benefitHistoryLabels: string[];
   programs: SupportProgram[];
   matched: ConditionCheck[];
   verify: ConditionCheck[];

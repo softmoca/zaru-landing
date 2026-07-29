@@ -2,6 +2,7 @@ import type {
   CandidateHome,
   CheckTone,
   ConditionCheck,
+  HousingBenefitHistory,
   HousingKnowledge,
   PersonalProfile,
   PrototypeResult,
@@ -9,7 +10,8 @@ import type {
 } from "./types";
 
 const URLS = {
-  nationalRent: "https://blog.bokjiro.go.kr/m/1828",
+  nationalRent:
+    "https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004661&wlfareInfoReldBztpCd=01",
   seoulRent: "https://housing.seoul.go.kr/site/main/content/sh01_060513?tr_code=short",
   seoulDeposit: "https://housing.seoul.go.kr/site/main/content/sh01_040901",
   seoulMoving:
@@ -29,13 +31,25 @@ const AWARENESS_LABELS: Record<PersonalProfile["awareness"], string> = {
 const KNOWLEDGE_LABELS: Record<HousingKnowledge, string> = {
   nationalRent: "복지로(전국) 청년월세지원",
   seoulRent: "서울시 청년월세지원",
-  rentHomeConditions: "후보 집 조건에 따라 월세지원 가능성이 달라진다는 점",
+  rentHomeConditions: "매물 조건에 따라 월세지원 가능성이 달라진다는 점",
   rentOverlapLimits:
     "동시 수급은 불가하지만, 다른 월세지원 종료 후에는 신청 가능한 경우가 있다는 점",
   depositInterest: "청년 임차보증금 이자지원",
   movingBrokerage: "중개보수·이사비 지원",
   evidenceRequired: "계약서·납부내역·영수증 같은 증빙이 필요하다는 점",
   none: "위 항목 중 알고 있던 내용 없음",
+};
+
+const BENEFIT_HISTORY_LABELS: Record<HousingBenefitHistory, string> = {
+  nationalRentCurrent: "복지로(전국) 청년월세지원 · 현재 수혜 중",
+  nationalRentEnded: "복지로(전국) 청년월세지원 · 수혜 종료",
+  seoulRentCurrent: "서울시 청년월세지원 · 현재 수혜 중",
+  seoulRentEnded: "서울시 청년월세지원 · 수혜 종료",
+  otherRentCurrent: "그 외 지자체 월세지원 · 현재 수혜 중",
+  otherRentEnded: "그 외 지자체 월세지원 · 수혜 종료",
+  depositInterest: "청년 임차보증금 이자지원 수혜 경험",
+  movingBrokerage: "중개보수·이사비 지원 수혜 경험",
+  none: "받은 주거혜택 없음",
 };
 
 const matched = (label: string, summary: string, detail: string): ConditionCheck => ({
@@ -77,9 +91,46 @@ function program(
 }
 
 function ageFit(profile: PersonalProfile, nationalOnly = false): CheckTone {
-  if (profile.ageBand === "unknown") return "verify";
+  if (profile.ageBand === "unselected") return "verify";
   if (profile.ageBand === "outside") return "risk";
   if (nationalOnly && profile.ageBand === "localOnly") return "risk";
+  return "matched";
+}
+
+function hasBenefit(
+  profile: PersonalProfile,
+  ...values: HousingBenefitHistory[]
+): boolean {
+  return values.some((value) => profile.benefitHistory.includes(value));
+}
+
+function nationalHistoryFit(profile: PersonalProfile): CheckTone {
+  if (
+    hasBenefit(
+      profile,
+      "nationalRentCurrent",
+      "seoulRentCurrent",
+      "otherRentCurrent"
+    )
+  ) {
+    return "risk";
+  }
+  if (hasBenefit(profile, "nationalRentEnded")) return "verify";
+  return "matched";
+}
+
+function seoulHistoryFit(profile: PersonalProfile): CheckTone {
+  if (
+    hasBenefit(
+      profile,
+      "nationalRentCurrent",
+      "seoulRentCurrent",
+      "seoulRentEnded",
+      "otherRentCurrent"
+    )
+  ) {
+    return "risk";
+  }
   return "matched";
 }
 
@@ -135,12 +186,19 @@ export function evaluateCandidate(
     checks.push(verify("소득 기준", "소득 기준을 아직 확인하지 않았어요", "전국 지원과 지역 지원은 가구와 소득을 다르게 볼 수 있어요"));
   }
 
-  if (profile.previousSupport === "no") {
-    checks.push(matched("이전 지원", "주거지원을 받은 경험이 없다고 입력했어요", "중복수혜 제한은 지원마다 달라 최종 공고에서 다시 확인해요"));
-  } else if (profile.previousSupport === "yes") {
-    checks.push(verify("이전 지원", "이전에 받은 지원과 중복 가능한지 확인해야 해요", "지원명·수혜 기간을 확인한 뒤 공식 기관에 문의하세요"));
+  if (profile.benefitHistory.includes("none")) {
+    checks.push(matched("주거혜택 이력", "받은 주거혜택이 없다고 입력했어요", "최종 신청 때는 가족이 대신 신청한 지원도 함께 확인해요"));
+  } else if (
+    hasBenefit(
+      profile,
+      "nationalRentCurrent",
+      "seoulRentCurrent",
+      "otherRentCurrent"
+    )
+  ) {
+    checks.push(verify("주거혜택 이력", "현재 받고 있는 월세지원이 있어요", "월세지원은 동시에 받을 수 없지만, 기존 지원이 끝난 뒤 다른 지원을 확인할 수 있어요"));
   } else {
-    checks.push(verify("이전 지원", "이전에 받은 주거지원이 있는지 확인하지 못했어요", "가족이 대신 신청한 지원도 함께 확인하세요"));
+    checks.push(matched("주거혜택 이력", "이전에 받은 지원의 종류와 종료 여부를 기록했어요", "같은 사업의 재신청 제한과 다른 사업의 신청 가능성을 각각 확인해요"));
   }
 
   if (home.region === "seoul") {
@@ -228,6 +286,7 @@ export function evaluateCandidate(
 
   const nationalFit = fitFrom([
     ageFit(profile, true),
+    nationalHistoryFit(profile),
     ...commonFit(profile),
     profile.separateFromParents === "yes"
       ? "matched"
@@ -248,11 +307,27 @@ export function evaluateCandidate(
       fit: nationalFit,
       summary: "월 최대 20만원, 최대 24회 지원하는 전국 단위 월세지원",
       reasons: [
-        "전국에서 확인할 수 있는 월세지원이에요.",
-        "부모와 별도 거주·무주택·소득·임대차 증빙을 함께 확인해요.",
+        profile.ageBand === "localOnly"
+          ? "전국 지원은 19~34세 기준이라 1986~1990년 출생 구간은 연령 조건과 맞지 않아요."
+          : "전국 지원은 19~34세 청년이 확인할 수 있는 월세지원이에요.",
+        hasBenefit(profile, "nationalRentCurrent", "seoulRentCurrent", "otherRentCurrent")
+          ? "현재 다른 월세지원을 받고 있다면 동시에 받을 수 없고, 수혜 종료 뒤 신청 가능성을 다시 확인해야 해요."
+          : hasBenefit(profile, "nationalRentEnded")
+            ? "전국 지원을 이미 24개월 모두 받았다면 다시 신청할 수 없어요. 일부만 받았다면 남은 기간 재개 가능성을 확인하세요."
+            : hasBenefit(profile, "seoulRentEnded", "otherRentEnded")
+              ? "다른 월세지원 수혜가 끝났다면 전국 지원 신청 가능성을 확인할 수 있어요."
+              : "부모와 별도 거주·무주택·소득·임대차 증빙을 함께 확인해요.",
       ],
       actions: [
-        profile.separateFromParents === "unknown" ? "부모와 별도 거주 기준 확인" : "원가구·청년가구 소득 기준 확인",
+        profile.ageBand === "localOnly"
+          ? "19~39세까지 가능한 서울시·지역 월세지원 확인"
+          : hasBenefit(profile, "nationalRentEnded")
+            ? "전국 지원의 기존 수혜 개월과 남은 지원 기간 확인"
+            : hasBenefit(profile, "seoulRentCurrent", "otherRentCurrent")
+              ? "현재 지원의 종료일과 다음 전국 지원 공고 확인"
+              : profile.separateFromParents === "unknown"
+                ? "부모와 별도 거주 기준 확인"
+                : "원가구·청년가구 소득 기준 확인",
         home.contractProof !== "yes" ? "계약 또는 입실 증빙 가능 여부 확인" : "계약 증빙 보관",
       ],
       officialUrl: URLS.nationalRent,
@@ -262,6 +337,7 @@ export function evaluateCandidate(
   if (home.region === "seoul") {
     const seoulRentFit = fitFrom([
       ageFit(profile),
+      seoulHistoryFit(profile),
       ...commonFit(profile),
       deposit > 8000 ? "risk" : "matched",
       rent > 60 ? "verify" : "matched",
@@ -278,7 +354,13 @@ export function evaluateCandidate(
         summary: "서울 거주 청년에게 월 최대 20만원, 최대 12개월을 지원한 사업",
         reasons: [
           "후보 집이 서울에 있어 지역 지원을 함께 확인해요.",
-          "신청 시 임차주택 주소와 주민등록·실거주지가 일치해야 해요.",
+          hasBenefit(profile, "seoulRentCurrent", "seoulRentEnded")
+            ? "서울시 청년월세지원에 이전에 선정됐다면 수혜 종료 후에도 다시 신청할 수 없어요."
+            : hasBenefit(profile, "nationalRentCurrent", "otherRentCurrent")
+              ? "현재 다른 월세지원을 받고 있다면 동시에 받을 수 없고, 수혜 종료 뒤 신청 가능성을 확인해야 해요."
+              : hasBenefit(profile, "nationalRentEnded", "otherRentEnded")
+                ? "다른 월세지원 수혜가 끝났다면 서울시 지원 신청 가능성을 확인할 수 있어요."
+                : "신청 시 임차주택 주소와 주민등록·실거주지가 일치해야 해요.",
         ],
         actions: [
           home.moveInRegistration !== "yes" ? "전입신고 가능 여부 확인" : "신청 시점 주민등록 주소 확인",
@@ -408,6 +490,9 @@ export function evaluateCandidate(
     description,
     awarenessLabel: AWARENESS_LABELS[profile.awareness],
     knowledgeLabels: profile.housingKnowledge.map((item) => KNOWLEDGE_LABELS[item]),
+    benefitHistoryLabels: profile.benefitHistory.map(
+      (item) => BENEFIT_HISTORY_LABELS[item]
+    ),
     programs,
     matched: groups.matched,
     verify: groups.verify,

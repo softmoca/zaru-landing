@@ -4,6 +4,7 @@ import { evaluateCandidate } from "./evaluate";
 import type {
   CandidateDecision,
   CandidateHome,
+  HousingBenefitHistory,
   HousingKnowledge,
   PersonalProfile,
   SupportProgram,
@@ -12,12 +13,12 @@ import type {
 const initialProfile: PersonalProfile = {
   awareness: "unselected",
   housingKnowledge: [],
-  ageBand: "unknown",
+  ageBand: "unselected",
   separateFromParents: "unknown",
   homeOwnership: "unknown",
   incomeCheck: "unknown",
   employment: "unknown",
-  previousSupport: "unknown",
+  benefitHistory: [],
 };
 
 const initialHome: CandidateHome = {
@@ -101,6 +102,37 @@ export function PrototypeApp() {
     });
   };
 
+  const toggleBenefitHistory = (value: HousingBenefitHistory) => {
+    setProfile((current) => {
+      if (value === "none") {
+        return { ...current, benefitHistory: ["none"] };
+      }
+
+      const alternatives: Partial<
+        Record<HousingBenefitHistory, HousingBenefitHistory>
+      > = {
+        nationalRentCurrent: "nationalRentEnded",
+        nationalRentEnded: "nationalRentCurrent",
+        seoulRentCurrent: "seoulRentEnded",
+        seoulRentEnded: "seoulRentCurrent",
+        otherRentCurrent: "otherRentEnded",
+        otherRentEnded: "otherRentCurrent",
+      };
+      const withoutNone = current.benefitHistory.filter(
+        (item) => item !== "none"
+      );
+      const pairedValue = alternatives[value];
+      const withoutPair = pairedValue
+        ? withoutNone.filter((item) => item !== pairedValue)
+        : withoutNone;
+      const next = withoutPair.includes(value)
+        ? withoutPair.filter((item) => item !== value)
+        : [...withoutPair, value];
+
+      return { ...current, benefitHistory: next };
+    });
+  };
+
   const submitHome = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     void track("listing_completed", {
@@ -170,6 +202,7 @@ export function PrototypeApp() {
       `후보 집: ${listingCount}번째 · ${home.nickname || "이름 없음"}`,
       `사용 전 인지 수준: ${result.awarenessLabel}`,
       `사용 전 알고 있던 내용: ${result.knowledgeLabels.join(" | ")}`,
+      `현재·과거 주거혜택: ${result.benefitHistoryLabels.join(" | ")}`,
       `새로 확인한 지원: ${result.programs.map((item) => `${item.name}(${item.statusLabel})`).join(" | ")}`,
       `계약 전 추가 확인: ${[...result.risk, ...result.verify].map((item) => item.label).join(", ") || "없음"}`,
       `새로 생긴 질문: ${result.questions.join(" | ")}`,
@@ -334,7 +367,7 @@ export function PrototypeApp() {
                   options={[
                     ["nationalRent", "복지로(전국) 청년월세지원"],
                     ["seoulRent", "서울시 청년월세지원"],
-                    ["rentHomeConditions", "내 조건뿐 아니라 후보 집 조건도 본다는 점"],
+                    ["rentHomeConditions", "내 조건뿐 아니라 매물 조건도 본다는 점"],
                     [
                       "rentOverlapLimits",
                       "동시 수급은 불가하지만, 다른 월세지원 종료 후에는 신청 가능한 경우가 있다는 점",
@@ -363,7 +396,6 @@ export function PrototypeApp() {
                     ["national", "1991년~2007년 출생"],
                     ["localOnly", "1986년~1990년 출생"],
                     ["outside", "해당 범위 밖"],
-                    ["unknown", "아직 확인하지 못했어요"],
                   ]}
                 />
               </fieldset>
@@ -447,20 +479,24 @@ export function PrototypeApp() {
               </label>
 
               <fieldset className="prototype-fieldset">
-                <legend>월세·보증금·이사비 주거지원을 받은 적이 있나요?</legend>
-                <RadioCards
-                  name="previousSupport"
-                  value={profile.previousSupport}
-                  onChange={(value) =>
-                    setProfile((current) => ({
-                      ...current,
-                      previousSupport: value as PersonalProfile["previousSupport"],
-                    }))
-                  }
+                <legend>현재 받고 있거나 이전에 받은 주거혜택을 모두 선택해주세요</legend>
+                <p className="prototype-help">
+                  같은 월세지원은 현재 수혜와 종료 중 하나만 선택할 수 있어요.
+                </p>
+                <CheckboxCards
+                  name="benefitHistory"
+                  values={profile.benefitHistory}
+                  onChange={toggleBenefitHistory}
                   options={[
-                    ["no", "없어요"],
-                    ["yes", "있어요"],
-                    ["unknown", "잘 모르겠어요"],
+                    ["nationalRentCurrent", "복지로(전국) 청년월세지원 · 현재 받고 있어요"],
+                    ["nationalRentEnded", "복지로(전국) 청년월세지원 · 수혜가 끝났어요"],
+                    ["seoulRentCurrent", "서울시 청년월세지원 · 현재 받고 있어요"],
+                    ["seoulRentEnded", "서울시 청년월세지원 · 수혜가 끝났어요"],
+                    ["otherRentCurrent", "그 외 지자체 월세지원 · 현재 받고 있어요"],
+                    ["otherRentEnded", "그 외 지자체 월세지원 · 수혜가 끝났어요"],
+                    ["depositInterest", "청년 임차보증금 이자지원을 받은 적이 있어요"],
+                    ["movingBrokerage", "중개보수(복비)·이사비 지원을 받은 적이 있어요"],
+                    ["none", "받은 주거혜택이 없어요"],
                   ]}
                 />
               </fieldset>
@@ -474,7 +510,9 @@ export function PrototypeApp() {
                   type="submit"
                   disabled={
                     profile.awareness === "unselected" ||
-                    profile.housingKnowledge.length === 0
+                    profile.housingKnowledge.length === 0 ||
+                    profile.ageBand === "unselected" ||
+                    profile.benefitHistory.length === 0
                   }
                 >
                   후보 집 입력하기
@@ -888,14 +926,19 @@ function RadioCards({ name, value, options, onChange }: RadioCardsProps) {
   );
 }
 
-interface CheckboxCardsProps {
+interface CheckboxCardsProps<T extends string> {
   name: string;
-  values: HousingKnowledge[];
-  options: Array<[HousingKnowledge, string]>;
-  onChange: (value: HousingKnowledge) => void;
+  values: T[];
+  options: Array<[T, string]>;
+  onChange: (value: T) => void;
 }
 
-function CheckboxCards({ name, values, options, onChange }: CheckboxCardsProps) {
+function CheckboxCards<T extends string>({
+  name,
+  values,
+  options,
+  onChange,
+}: CheckboxCardsProps<T>) {
   return (
     <div className="prototype-checkbox-group">
       {options.map(([optionValue, label]) => (

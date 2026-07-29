@@ -15,7 +15,16 @@ import { supabase } from "./supabase";
 export type EventName =
   | "view" //         페이지 진입
   | "depth" //        스크롤 깊이 도달 (25/50/75/100)
-  | "step_view"; //    [5] 세 가지 순간 스텝 도달
+  | "step_view" //     [5] 세 가지 순간 스텝 도달
+  | "prototype_start"
+  | "prototype_step"
+  | "profile_completed"
+  | "listing_completed"
+  | "result_viewed"
+  | "question_copied"
+  | "decision_saved"
+  | "official_source_clicked"
+  | "second_listing_started";
 
 const SESSION_KEY = "zaru:session";
 const SRC_KEY = "zaru:src";

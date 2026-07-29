@@ -25,6 +25,7 @@ export type EventName =
   | "research_record_copied"
   | "decision_saved"
   | "official_source_clicked"
+  | "feedback_form_clicked"
   | "second_listing_started";
 
 const SESSION_KEY = "zaru:session";

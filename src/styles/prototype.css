@@ -479,6 +479,20 @@
   background: var(--forest);
   box-shadow: 0 12px 28px rgba(52, 65, 38, 0.16);
   color: var(--cream);
+  text-decoration: none;
+  transition:
+    box-shadow var(--dur-ui) var(--ease-out),
+    transform var(--dur-ui) var(--ease-out);
+}
+
+.prototype-feedback-reward:hover {
+  box-shadow: 0 16px 32px rgba(52, 65, 38, 0.22);
+  transform: translateY(-2px);
+}
+
+.prototype-feedback-reward:focus-visible {
+  outline: 3px solid var(--mustard);
+  outline-offset: 3px;
 }
 
 .prototype-feedback-reward__icon {
@@ -506,6 +520,13 @@
   color: rgba(248, 243, 232, 0.76);
   font-size: 0.73rem;
   line-height: 1.45;
+}
+
+.prototype-feedback-reward__arrow {
+  margin-left: auto;
+  color: var(--mustard);
+  font-size: 1.2rem;
+  font-weight: 800;
 }
 
 .prototype-result__hero h1 {

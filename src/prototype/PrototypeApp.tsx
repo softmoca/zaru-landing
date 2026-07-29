@@ -10,6 +10,9 @@ import type {
   SupportProgram,
 } from "./types";
 
+const FEEDBACK_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSexhN_EUiIRj9z3ZjDXAkLLgecHl2xVfxqP81T9cMVhO1T-Vg/viewform?usp=publish-editor";
+
 const initialProfile: PersonalProfile = {
   awareness: "unselected",
   housingKnowledge: [],
@@ -714,13 +717,26 @@ export function PrototypeApp() {
         {step === 3 && (
           <section className="prototype-result" aria-labelledby="result-title" aria-live="polite">
             <div className="prototype-result__hero">
-              <aside className="prototype-feedback-reward" aria-label="후기 참여 안내">
+              <a
+                className="prototype-feedback-reward"
+                href={FEEDBACK_FORM_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="30초 후기 남기고 커피 기프티콘 받기, 새 창에서 열림"
+                onClick={() =>
+                  void track("feedback_form_clicked", {
+                    target: "result_reward_banner",
+                    payload: { participant: pid, listing: listingCount },
+                  })
+                }
+              >
                 <span className="prototype-feedback-reward__icon" aria-hidden="true">☕</span>
                 <span>
                   <strong>후기 남겨주신 분께 커피 기프티콘을 드립니다</strong>
                   <small>결과를 확인한 뒤 30초 설문에 참여해주세요.</small>
                 </span>
-              </aside>
+                <span className="prototype-feedback-reward__arrow" aria-hidden="true">→</span>
+              </a>
               <p className="prototype-kicker">{home.nickname || "후보 집"} · 확인 결과</p>
               <h1 id="result-title">{result.headline}</h1>
               <p>{result.description}</p>

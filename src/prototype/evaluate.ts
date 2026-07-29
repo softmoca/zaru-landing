@@ -2,6 +2,7 @@ import type {
   CandidateHome,
   CheckTone,
   ConditionCheck,
+  HousingKnowledge,
   PersonalProfile,
   PrototypeResult,
   SupportProgram,
@@ -18,11 +19,22 @@ const URLS = {
 };
 
 const AWARENESS_LABELS: Record<PersonalProfile["awareness"], string> = {
+  unselected: "사용 전 인지 수준을 선택하지 않았어요",
   none: "주거지원 제도를 몰랐어요",
   nameOnly: "청년월세지원 이름만 들어봤어요",
-  checkedMine: "나의 조건만 확인해봤어요",
-  checkedHome: "후보 집 조건까지 확인해봤어요",
-  applied: "직접 신청하거나 지원받은 경험이 있어요",
+  conditionBasics: "청년월세지원에 조건이 있다는 정도만 알고 있었어요",
+  conditionMost: "청년월세지원의 주요 조건을 대부분 알고 있었어요",
+};
+
+const KNOWLEDGE_LABELS: Record<HousingKnowledge, string> = {
+  nationalRent: "복지로(전국) 청년월세지원",
+  seoulRent: "서울시 청년월세지원",
+  rentHomeConditions: "후보 집 조건에 따라 월세지원 가능성이 달라진다는 점",
+  rentOverlapLimits: "월세지원 사업 사이에 중복수혜 제한이 있다는 점",
+  depositInterest: "청년 임차보증금 이자지원",
+  movingBrokerage: "중개보수·이사비 지원",
+  evidenceRequired: "계약서·납부내역·영수증 같은 증빙이 필요하다는 점",
+  none: "위 항목 중 알고 있던 내용 없음",
 };
 
 const matched = (label: string, summary: string, detail: string): ConditionCheck => ({
@@ -394,6 +406,7 @@ export function evaluateCandidate(
     headline,
     description,
     awarenessLabel: AWARENESS_LABELS[profile.awareness],
+    knowledgeLabels: profile.housingKnowledge.map((item) => KNOWLEDGE_LABELS[item]),
     programs,
     matched: groups.matched,
     verify: groups.verify,

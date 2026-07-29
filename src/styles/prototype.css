@@ -331,6 +331,73 @@
   outline-offset: 2px;
 }
 
+.prototype-checkbox-group {
+  display: grid;
+  gap: 9px;
+}
+
+.prototype-checkbox {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.prototype-checkbox input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.prototype-checkbox span {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  border: 1px solid var(--olive-16);
+  border-radius: 13px;
+  padding: 11px 14px 11px 42px;
+  background: rgba(248, 243, 232, 0.56);
+  color: var(--forest-72);
+  font-size: 0.87rem;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.prototype-checkbox span::before {
+  position: absolute;
+  left: 15px;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1.5px solid var(--olive-28);
+  border-radius: 5px;
+  color: white;
+  content: "";
+}
+
+.prototype-checkbox input:checked + span {
+  border-color: var(--olive);
+  background: var(--olive-08);
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.prototype-checkbox input:checked + span::before {
+  border-color: var(--olive);
+  background: var(--olive);
+  content: "✓";
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.prototype-checkbox input:focus-visible + span {
+  outline: 3px solid var(--mustard);
+  outline-offset: 2px;
+}
+
 .prototype-field {
   display: grid;
   margin-bottom: 30px;

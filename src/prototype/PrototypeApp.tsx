@@ -4,12 +4,14 @@ import { evaluateCandidate } from "./evaluate";
 import type {
   CandidateDecision,
   CandidateHome,
+  HousingKnowledge,
   PersonalProfile,
   SupportProgram,
 } from "./types";
 
 const initialProfile: PersonalProfile = {
-  awareness: "none",
+  awareness: "unselected",
+  housingKnowledge: [],
   ageBand: "unknown",
   separateFromParents: "unknown",
   homeOwnership: "unknown",
@@ -75,9 +77,28 @@ export function PrototypeApp() {
     event.preventDefault();
     void track("profile_completed", {
       target: profile.awareness,
-      payload: { participant: pid },
+      payload: {
+        participant: pid,
+        knowledgeCount: profile.housingKnowledge.includes("none")
+          ? 0
+          : profile.housingKnowledge.length,
+      },
     });
     goTo(2);
+  };
+
+  const toggleHousingKnowledge = (value: HousingKnowledge) => {
+    setProfile((current) => {
+      if (value === "none") {
+        return { ...current, housingKnowledge: ["none"] };
+      }
+
+      const withoutNone = current.housingKnowledge.filter((item) => item !== "none");
+      const next = withoutNone.includes(value)
+        ? withoutNone.filter((item) => item !== value)
+        : [...withoutNone, value];
+      return { ...current, housingKnowledge: next };
+    });
   };
 
   const submitHome = (event: FormEvent<HTMLFormElement>) => {
@@ -148,6 +169,7 @@ export function PrototypeApp() {
       `참가자: ${pid}`,
       `후보 집: ${listingCount}번째 · ${home.nickname || "이름 없음"}`,
       `사용 전 인지 수준: ${result.awarenessLabel}`,
+      `사용 전 알고 있던 내용: ${result.knowledgeLabels.join(" | ")}`,
       `새로 확인한 지원: ${result.programs.map((item) => `${item.name}(${item.statusLabel})`).join(" | ")}`,
       `계약 전 추가 확인: ${[...result.risk, ...result.verify].map((item) => item.label).join(", ") || "없음"}`,
       `새로 생긴 질문: ${result.questions.join(" | ")}`,
@@ -280,8 +302,8 @@ export function PrototypeApp() {
 
             <form onSubmit={submitProfile}>
               <fieldset className="prototype-fieldset">
-                <legend>주거지원에 대해 어디까지 알고 있었나요?</legend>
-                <p className="prototype-help">프로토타입 사용 전의 상태를 그대로 선택해주세요.</p>
+                <legend>청년월세지원에 대해 어디까지 알고 있었나요?</legend>
+                <p className="prototype-help">가장 가까운 단계 하나를 선택해주세요.</p>
                 <RadioCards
                   name="awareness"
                   value={profile.awareness}
@@ -292,11 +314,32 @@ export function PrototypeApp() {
                     }))
                   }
                   options={[
-                    ["none", "관련 제도가 있는지 몰랐어요"],
+                    ["none", "관련 제도가 있는 줄 몰랐어요"],
                     ["nameOnly", "청년월세지원이라는 이름만 들어봤어요"],
-                    ["checkedMine", "나의 나이·소득 조건은 확인해봤어요"],
-                    ["checkedHome", "후보 집의 조건까지 확인해봤어요"],
-                    ["applied", "직접 신청하거나 지원받은 경험이 있어요"],
+                    ["conditionBasics", "지원받기 위한 조건이 있다는 정도만 알고 있었어요"],
+                    ["conditionMost", "지원받기 위한 주요 조건을 대부분 알고 있었어요"],
+                  ]}
+                />
+              </fieldset>
+
+              <fieldset className="prototype-fieldset">
+                <legend>이미 들어보거나 알고 있던 내용을 모두 선택해주세요</legend>
+                <p className="prototype-help">
+                  여러 개를 선택할 수 있어요. 정확한 지원 조건은 결과에서 확인합니다.
+                </p>
+                <CheckboxCards
+                  name="housingKnowledge"
+                  values={profile.housingKnowledge}
+                  onChange={toggleHousingKnowledge}
+                  options={[
+                    ["nationalRent", "복지로(전국) 청년월세지원"],
+                    ["seoulRent", "서울시 청년월세지원"],
+                    ["rentHomeConditions", "내 조건뿐 아니라 후보 집 조건도 본다는 점"],
+                    ["rentOverlapLimits", "월세지원 사업 사이에 중복수혜 제한이 있다는 점"],
+                    ["depositInterest", "청년 임차보증금 이자지원"],
+                    ["movingBrokerage", "부동산 중개보수(복비)·이사비 지원"],
+                    ["evidenceRequired", "계약서·납부내역·영수증 같은 증빙이 필요하다는 점"],
+                    ["none", "위 항목 중 알고 있던 내용이 없어요"],
                   ]}
                 />
               </fieldset>
@@ -423,7 +466,14 @@ export function PrototypeApp() {
                 <button className="prototype-button prototype-button--ghost" type="button" onClick={() => goTo(0)}>
                   이전
                 </button>
-                <button className="prototype-button prototype-button--primary" type="submit">
+                <button
+                  className="prototype-button prototype-button--primary"
+                  type="submit"
+                  disabled={
+                    profile.awareness === "unselected" ||
+                    profile.housingKnowledge.length === 0
+                  }
+                >
                   후보 집 입력하기
                 </button>
               </div>
@@ -826,6 +876,32 @@ function RadioCards({ name, value, options, onChange }: RadioCardsProps) {
             name={name}
             onChange={() => onChange(optionValue)}
             type="radio"
+            value={optionValue}
+          />
+          <span>{label}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+interface CheckboxCardsProps {
+  name: string;
+  values: HousingKnowledge[];
+  options: Array<[HousingKnowledge, string]>;
+  onChange: (value: HousingKnowledge) => void;
+}
+
+function CheckboxCards({ name, values, options, onChange }: CheckboxCardsProps) {
+  return (
+    <div className="prototype-checkbox-group">
+      {options.map(([optionValue, label]) => (
+        <label className="prototype-checkbox" key={optionValue}>
+          <input
+            checked={values.includes(optionValue)}
+            name={name}
+            onChange={() => onChange(optionValue)}
+            type="checkbox"
             value={optionValue}
           />
           <span>{label}</span>

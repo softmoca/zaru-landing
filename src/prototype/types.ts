@@ -1,14 +1,25 @@
 export type Answer = "yes" | "no" | "unknown";
 
 export type AwarenessLevel =
+  | "unselected"
   | "none"
   | "nameOnly"
-  | "checkedMine"
-  | "checkedHome"
-  | "applied";
+  | "conditionBasics"
+  | "conditionMost";
+
+export type HousingKnowledge =
+  | "nationalRent"
+  | "seoulRent"
+  | "rentHomeConditions"
+  | "rentOverlapLimits"
+  | "depositInterest"
+  | "movingBrokerage"
+  | "evidenceRequired"
+  | "none";
 
 export interface PersonalProfile {
   awareness: AwarenessLevel;
+  housingKnowledge: HousingKnowledge[];
   ageBand: "national" | "localOnly" | "outside" | "unknown";
   separateFromParents: Answer;
   homeOwnership: Answer;
@@ -64,6 +75,7 @@ export interface PrototypeResult {
   headline: string;
   description: string;
   awarenessLabel: string;
+  knowledgeLabels: string[];
   programs: SupportProgram[];
   matched: ConditionCheck[];
   verify: ConditionCheck[];

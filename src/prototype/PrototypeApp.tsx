@@ -5,16 +5,16 @@ import type {
   CandidateDecision,
   CandidateHome,
   PersonalProfile,
+  SupportProgram,
 } from "./types";
 
-const OFFICIAL_URL =
-  "https://housing.seoul.go.kr/site/main/content/sh01_060513?tr_code=short";
-
 const initialProfile: PersonalProfile = {
+  awareness: "none",
   ageBand: "unknown",
-  residencePlan: "unknown",
+  separateFromParents: "unknown",
   homeOwnership: "unknown",
   incomeCheck: "unknown",
+  employment: "unknown",
   previousSupport: "unknown",
 };
 
@@ -25,6 +25,9 @@ const initialHome: CandidateHome = {
   rent: "",
   housingType: "unknown",
   moveInRegistration: "unknown",
+  contractProof: "unknown",
+  paymentProof: "unknown",
+  receiptPlan: "unknown",
 };
 
 const STEP_LABELS = ["안내", "나의 조건", "후보 집", "확인 결과"];
@@ -50,7 +53,7 @@ export function PrototypeApp() {
 
   useEffect(() => {
     trackOnce("prototype_view", "view", {
-      target: "support_check_prototype",
+      target: "multi_support_check_prototype",
       payload: { participant: pid },
     });
   }, [pid]);
@@ -71,7 +74,7 @@ export function PrototypeApp() {
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     void track("profile_completed", {
-      target: "personal_profile",
+      target: profile.awareness,
       payload: { participant: pid },
     });
     goTo(2);
@@ -84,15 +87,19 @@ export function PrototypeApp() {
       payload: {
         participant: pid,
         listing: listingCount,
+        region: home.region,
+        housingType: home.housingType,
         unknownTransfer: home.moveInRegistration === "unknown",
       },
     });
     void track("result_viewed", {
-      target: result.risk.length > 0 ? "risk" : result.verify.length > 0 ? "verify" : "matched",
+      target: "multi_support_map",
       payload: {
         participant: pid,
         listing: listingCount,
-        matched: result.matched.length,
+        awareness: profile.awareness,
+        programs: result.programs.length,
+        openPrograms: result.programs.filter((item) => item.status === "open").length,
         verify: result.verify.length,
         risk: result.risk.length,
       },
@@ -140,9 +147,11 @@ export function PrototypeApp() {
       "[자취선배 프로토타입 검증 기록]",
       `참가자: ${pid}`,
       `후보 집: ${listingCount}번째 · ${home.nickname || "이름 없음"}`,
-      `확인 결과: 맞는 조건 ${result.matched.length} / 추가 확인 ${result.verify.length} / 불일치 가능성 ${result.risk.length}`,
-      `추가 확인: ${[...result.risk, ...result.verify].map((item) => item.label).join(", ") || "없음"}`,
-      `중개인 질문: ${result.questions.join(" | ")}`,
+      `사용 전 인지 수준: ${result.awarenessLabel}`,
+      `새로 확인한 지원: ${result.programs.map((item) => `${item.name}(${item.statusLabel})`).join(" | ")}`,
+      `계약 전 추가 확인: ${[...result.risk, ...result.verify].map((item) => item.label).join(", ") || "없음"}`,
+      `새로 생긴 질문: ${result.questions.join(" | ")}`,
+      `남겨야 할 증빙: ${result.evidence.join(" | ")}`,
       `후보 판단: ${decision ? decisionLabels[decision] : "기록 전"}`,
       `판단 메모: ${note.trim() || "없음"}`,
       `기록 시각: ${new Date().toLocaleString("ko-KR")}`,
@@ -157,6 +166,7 @@ export function PrototypeApp() {
           participant: pid,
           listing: listingCount,
           decision: decision || "not_recorded",
+          programs: result.programs.length,
         },
       });
     } catch {
@@ -194,7 +204,7 @@ export function PrototypeApp() {
           <span className="prototype-brand__mark" aria-hidden="true">ㅈ</span>
           <span>
             <strong>자취선배</strong>
-            <small>계약 전 지원조건 확인</small>
+            <small>계약 전 주거지원 확인</small>
           </span>
         </a>
         <span className="prototype-badge">검증용 프로토타입</span>
@@ -213,31 +223,30 @@ export function PrototypeApp() {
       <main id="prototype-main" className="prototype-main">
         {step === 0 && (
           <section className="prototype-intro" aria-labelledby="intro-title">
-            <p className="prototype-kicker">이 집을 계약하기 전에</p>
+            <p className="prototype-kicker">싼 월세만 보고 계약하기 전에</p>
             <h1 id="intro-title">
-              지원조건과 후보 집을
+              이 집에서 받을 지원과
               <br />
-              같이 확인해보세요
+              놓치면 안 될 조건을 확인하세요
             </h1>
             <p className="prototype-intro__lead">
-              내 조건만 확인하고 계약하면 후보 집의 지역·보증금·월세·전입신고
-              조건을 뒤늦게 발견할 수 있어요.
+              지역·보증금·월세·전입신고·계약 증빙에 따라 달라지는 월세지원,
+              보증금 이자지원, 이사비 지원과 다음 행동을 함께 보여드려요.
             </p>
 
             <div className="prototype-flow" aria-label="확인 과정">
-              <span>나의 조건</span>
+              <span>내가 알던 정보</span>
               <b aria-hidden="true">＋</b>
-              <span>후보 집</span>
+              <span>실제 후보 집</span>
               <b aria-hidden="true">→</b>
-              <span>질문과 다음 행동</span>
+              <span>지원·질문·증빙</span>
             </div>
 
             <div className="prototype-notice">
-              <strong>먼저 알아두세요</strong>
+              <strong>고시원이나 전입신고 미표시 매물도 확인할 수 있어요</strong>
               <p>
-                이 화면은 사용 흐름을 확인하기 위한 프로토타입입니다. 지원 대상
-                여부를 확정하지 않으며, 2026년 서울시 청년월세지원 공개 기준을
-                참고해 확인할 질문을 안내합니다.
+                고시원이라고 모든 지원에서 제외되는 것은 아닙니다. 전입신고,
+                입실확인서, 월세 납부 증빙 등 지원별로 달라지는 조건을 확인해요.
               </p>
             </div>
 
@@ -252,7 +261,7 @@ export function PrototypeApp() {
                 goTo(1);
               }}
             >
-              후보 집 확인 시작하기
+              실제 후보 집으로 확인하기
             </button>
             <p className="prototype-privacy">
               입력 내용은 이 브라우저 화면에서만 사용하며 이벤트에는 개인 조건을
@@ -264,15 +273,37 @@ export function PrototypeApp() {
         {step === 1 && (
           <section className="prototype-card" aria-labelledby="profile-title">
             <div className="prototype-card__heading">
-              <p className="prototype-kicker">1. 나의 조건</p>
-              <h1 id="profile-title">정확하지 않아도 괜찮아요</h1>
-              <p>모르는 항목은 ‘아직 확인하지 못했어요’를 선택해주세요.</p>
+              <p className="prototype-kicker">1. 사용 전 상태</p>
+              <h1 id="profile-title">지금 알고 있는 만큼만 답해주세요</h1>
+              <p>지원제도를 몰라도 괜찮아요. 모르는 항목은 그대로 선택해주세요.</p>
             </div>
 
             <form onSubmit={submitProfile}>
               <fieldset className="prototype-fieldset">
+                <legend>주거지원에 대해 어디까지 알고 있었나요?</legend>
+                <p className="prototype-help">프로토타입 사용 전의 상태를 그대로 선택해주세요.</p>
+                <RadioCards
+                  name="awareness"
+                  value={profile.awareness}
+                  onChange={(value) =>
+                    setProfile((current) => ({
+                      ...current,
+                      awareness: value as PersonalProfile["awareness"],
+                    }))
+                  }
+                  options={[
+                    ["none", "관련 제도가 있는지 몰랐어요"],
+                    ["nameOnly", "청년월세지원이라는 이름만 들어봤어요"],
+                    ["checkedMine", "나의 나이·소득 조건은 확인해봤어요"],
+                    ["checkedHome", "후보 집의 조건까지 확인해봤어요"],
+                    ["applied", "직접 신청하거나 지원받은 경험이 있어요"],
+                  ]}
+                />
+              </fieldset>
+
+              <fieldset className="prototype-fieldset">
                 <legend>출생연도가 어디에 해당하나요?</legend>
-                <p className="prototype-help">2026년 서울시 공고의 연령 기준을 참고합니다.</p>
+                <p className="prototype-help">정확한 생년월일은 입력하지 않습니다.</p>
                 <RadioCards
                   name="ageBand"
                   value={profile.ageBand}
@@ -283,7 +314,8 @@ export function PrototypeApp() {
                     }))
                   }
                   options={[
-                    ["eligible", "1986년~2007년 출생"],
+                    ["national", "1991년~2007년 출생"],
+                    ["localOnly", "1986년~1990년 출생"],
                     ["outside", "해당 범위 밖"],
                     ["unknown", "아직 확인하지 못했어요"],
                   ]}
@@ -291,19 +323,19 @@ export function PrototypeApp() {
               </fieldset>
 
               <fieldset className="prototype-fieldset">
-                <legend>지원 신청 시 서울에 전입해 거주할 예정인가요?</legend>
+                <legend>부모님과 따로 거주하거나 거주할 예정인가요?</legend>
                 <RadioCards
-                  name="residencePlan"
-                  value={profile.residencePlan}
+                  name="separateFromParents"
+                  value={profile.separateFromParents}
                   onChange={(value) =>
                     setProfile((current) => ({
                       ...current,
-                      residencePlan: value as PersonalProfile["residencePlan"],
+                      separateFromParents: value as PersonalProfile["separateFromParents"],
                     }))
                   }
                   options={[
-                    ["seoul", "서울에 거주할 예정이에요"],
-                    ["outside", "서울 외 지역에 거주할 예정이에요"],
+                    ["yes", "따로 거주해요"],
+                    ["no", "함께 거주해요"],
                     ["unknown", "아직 정하지 못했어요"],
                   ]}
                 />
@@ -348,8 +380,28 @@ export function PrototypeApp() {
                 />
               </fieldset>
 
+              <label className="prototype-field">
+                <span>현재 상태</span>
+                <select
+                  value={profile.employment}
+                  onChange={(event) =>
+                    setProfile((current) => ({
+                      ...current,
+                      employment: event.target.value as PersonalProfile["employment"],
+                    }))
+                  }
+                >
+                  <option value="unknown">아직 선택하지 않을게요</option>
+                  <option value="employed">근로 중</option>
+                  <option value="startup">사업 중</option>
+                  <option value="jobseeker">취업 준비 중</option>
+                  <option value="student">학생</option>
+                  <option value="other">그 외</option>
+                </select>
+              </label>
+
               <fieldset className="prototype-fieldset">
-                <legend>서울시 청년월세지원을 받은 적이 있나요?</legend>
+                <legend>월세·보증금·이사비 주거지원을 받은 적이 있나요?</legend>
                 <RadioCards
                   name="previousSupport"
                   value={profile.previousSupport}
@@ -383,7 +435,7 @@ export function PrototypeApp() {
           <section className="prototype-card" aria-labelledby="home-title">
             <div className="prototype-card__heading">
               <p className="prototype-kicker">{listingCount}. 후보 집</p>
-              <h1 id="home-title">실제 알아본 매물을 입력해주세요</h1>
+              <h1 id="home-title">실제로 알아본 매물을 입력해주세요</h1>
               <p>중개인 연락처와 상세 주소는 입력하지 않아도 됩니다.</p>
             </div>
 
@@ -396,7 +448,7 @@ export function PrototypeApp() {
                   onChange={(event) =>
                     setHome((current) => ({ ...current, nickname: event.target.value }))
                   }
-                  placeholder="예: 학교 근처 두 번째 원룸"
+                  placeholder="예: 학교 근처 월세 40 고시원"
                   autoComplete="off"
                 />
               </label>
@@ -414,8 +466,9 @@ export function PrototypeApp() {
                   }
                   options={[
                     ["seoul", "서울"],
-                    ["capital", "경기·인천"],
-                    ["outside", "그 외 지역"],
+                    ["seongnam", "성남"],
+                    ["otherCapital", "그 외 경기·인천"],
+                    ["outside", "수도권 외 지역"],
                     ["unknown", "아직 확인하지 못했어요"],
                   ]}
                 />
@@ -434,7 +487,7 @@ export function PrototypeApp() {
                       onChange={(event) =>
                         setHome((current) => ({ ...current, deposit: event.target.value }))
                       }
-                      placeholder="1000"
+                      placeholder="300"
                     />
                     <b>만원</b>
                   </span>
@@ -451,7 +504,7 @@ export function PrototypeApp() {
                       onChange={(event) =>
                         setHome((current) => ({ ...current, rent: event.target.value }))
                       }
-                      placeholder="55"
+                      placeholder="40"
                     />
                     <b>만원</b>
                   </span>
@@ -474,6 +527,7 @@ export function PrototypeApp() {
                   <option value="officetel">오피스텔</option>
                   <option value="villa">빌라</option>
                   <option value="goshiwon">고시원·고시텔</option>
+                  <option value="sharehouse">셰어하우스</option>
                   <option value="other">기타</option>
                 </select>
               </label>
@@ -492,7 +546,64 @@ export function PrototypeApp() {
                   options={[
                     ["yes", "가능하다고 확인했어요"],
                     ["no", "불가능하다고 들었어요"],
-                    ["unknown", "아직 물어보지 못했어요"],
+                    ["unknown", "매물에 표시가 없거나 아직 물어보지 못했어요"],
+                  ]}
+                />
+              </fieldset>
+
+              <fieldset className="prototype-fieldset">
+                <legend>계약서나 입실확인서를 받을 수 있나요?</legend>
+                <RadioCards
+                  name="contractProof"
+                  value={home.contractProof}
+                  onChange={(value) =>
+                    setHome((current) => ({
+                      ...current,
+                      contractProof: value as CandidateHome["contractProof"],
+                    }))
+                  }
+                  options={[
+                    ["yes", "받을 수 있다고 확인했어요"],
+                    ["no", "발급이 어렵다고 들었어요"],
+                    ["unknown", "아직 확인하지 못했어요"],
+                  ]}
+                />
+              </fieldset>
+
+              <fieldset className="prototype-fieldset">
+                <legend>월세 납부 기록을 남길 수 있나요?</legend>
+                <RadioCards
+                  name="paymentProof"
+                  value={home.paymentProof}
+                  onChange={(value) =>
+                    setHome((current) => ({
+                      ...current,
+                      paymentProof: value as CandidateHome["paymentProof"],
+                    }))
+                  }
+                  options={[
+                    ["yes", "계좌이체나 납부확인서로 남길 수 있어요"],
+                    ["no", "현금 납부이고 증빙이 어렵다고 들었어요"],
+                    ["unknown", "아직 확인하지 못했어요"],
+                  ]}
+                />
+              </fieldset>
+
+              <fieldset className="prototype-fieldset">
+                <legend>중개보수와 이사비 영수증을 받을 예정인가요?</legend>
+                <RadioCards
+                  name="receiptPlan"
+                  value={home.receiptPlan}
+                  onChange={(value) =>
+                    setHome((current) => ({
+                      ...current,
+                      receiptPlan: value as CandidateHome["receiptPlan"],
+                    }))
+                  }
+                  options={[
+                    ["yes", "영수증을 받아 보관할 예정이에요"],
+                    ["no", "받지 않을 것 같아요"],
+                    ["unknown", "생각해보지 못했어요"],
                   ]}
                 />
               </fieldset>
@@ -502,7 +613,7 @@ export function PrototypeApp() {
                   이전
                 </button>
                 <button className="prototype-button prototype-button--primary" type="submit">
-                  계약 전 조건 확인하기
+                  지원과 계약 조건 확인하기
                 </button>
               </div>
             </form>
@@ -515,12 +626,38 @@ export function PrototypeApp() {
               <p className="prototype-kicker">{home.nickname || "후보 집"} · 확인 결과</p>
               <h1 id="result-title">{result.headline}</h1>
               <p>{result.description}</p>
-              <div className="prototype-score" aria-label="조건 확인 요약">
-                <span><b>{result.matched.length}</b>현재 입력과 맞음</span>
-                <span><b>{result.verify.length}</b>추가 확인</span>
-                <span><b>{result.risk.length}</b>조건 불일치 가능성</span>
+              <p className="prototype-awareness">
+                <span>사용 전</span>
+                {result.awarenessLabel}
+              </p>
+              <div className="prototype-score" aria-label="확인 결과 요약">
+                <span><b>{result.programs.length}</b>확인할 지원</span>
+                <span><b>{result.programs.filter((item) => item.status === "open").length}</b>현재 신청 경로</span>
+                <span><b>{result.verify.length + result.risk.length}</b>계약 전 확인</span>
               </div>
             </div>
+
+            <section className="prototype-programs" aria-labelledby="programs-title">
+              <div className="prototype-section-heading">
+                <p className="prototype-kicker">지역과 후보 집을 함께 비교한 결과</p>
+                <h2 id="programs-title">확인할 주거지원</h2>
+                <p>마감된 사업도 다음 모집을 준비할 수 있도록 필요한 행동을 보여드려요.</p>
+              </div>
+              <div className="prototype-program-list">
+                {result.programs.map((item) => (
+                  <ProgramCard
+                    key={item.id}
+                    program={item}
+                    onOfficialClick={() =>
+                      void track("official_source_clicked", {
+                        target: item.id,
+                        payload: { participant: pid, listing: listingCount },
+                      })
+                    }
+                  />
+                ))}
+              </div>
+            </section>
 
             {result.risk.length > 0 && (
               <ResultGroup
@@ -538,21 +675,13 @@ export function PrototypeApp() {
                 tone="verify"
               />
             )}
-            {result.matched.length > 0 && (
-              <ResultGroup
-                title="현재 입력에서 맞는 조건"
-                description="최종 심사 결과가 아니라, 입력한 내용과 공개 기준을 비교한 결과예요."
-                checks={result.matched}
-                tone="matched"
-              />
-            )}
 
             <section className="prototype-result-card prototype-questions" aria-labelledby="questions-title">
               <div className="prototype-result-card__heading">
                 <span className="prototype-result-card__icon" aria-hidden="true">?</span>
                 <div>
                   <p className="prototype-kicker">다음 행동</p>
-                  <h2 id="questions-title">중개인에게 물어볼 질문</h2>
+                  <h2 id="questions-title">계약 전에 물어볼 질문</h2>
                 </div>
               </div>
               <ol>
@@ -566,6 +695,19 @@ export function PrototypeApp() {
               {copyState === "failed" && (
                 <p className="prototype-error">복사하지 못했어요. 질문을 직접 선택해 복사해주세요.</p>
               )}
+            </section>
+
+            <section className="prototype-result-card prototype-evidence" aria-labelledby="evidence-title">
+              <div className="prototype-result-card__heading">
+                <span className="prototype-result-card__icon" aria-hidden="true">▣</span>
+                <div>
+                  <p className="prototype-kicker">계약 순간부터</p>
+                  <h2 id="evidence-title">나중을 위해 남길 증빙</h2>
+                </div>
+              </div>
+              <ul>
+                {result.evidence.map((item) => <li key={item}>{item}</li>)}
+              </ul>
             </section>
 
             <section className="prototype-result-card" aria-labelledby="decision-title">
@@ -588,11 +730,11 @@ export function PrototypeApp() {
                 ]}
               />
               <label className="prototype-field">
-                <span>판단이 달라졌다면 이유를 남겨주세요</span>
+                <span>프로토타입을 본 뒤 판단이 달라졌다면 이유를 남겨주세요</span>
                 <textarea
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
-                  placeholder="예: 전입신고 가능 여부를 확인하기 전까지 보류"
+                  placeholder="예: 싼 월세만 봤는데 전입신고와 입실확인서를 먼저 확인하기로 함"
                   rows={4}
                 />
               </label>
@@ -611,10 +753,10 @@ export function PrototypeApp() {
                 <span className="prototype-result-card__icon" aria-hidden="true">↗</span>
                 <div>
                   <p className="prototype-kicker">인터뷰 기록</p>
-                  <h2 id="export-title">결과를 인터뷰어에게 보내주세요</h2>
+                  <h2 id="export-title">사용 전후 변화를 보내주세요</h2>
                   <p>
-                    개인 조건과 금액은 제외하고, 참가자 번호·확인 결과·질문·후보
-                    판단만 복사합니다.
+                    개인 조건과 금액은 제외하고, 사용 전 인지 수준·새로 확인한
+                    지원·질문·후보 판단만 복사합니다.
                   </p>
                 </div>
               </div>
@@ -639,30 +781,16 @@ export function PrototypeApp() {
 
             <section className="prototype-official" aria-labelledby="official-title">
               <p className="prototype-kicker">2026년 7월 30일 기준</p>
-              <h2 id="official-title">최종 확인은 공식 공고에서</h2>
+              <h2 id="official-title">지원은 찾되, 자격을 단정하지 않아요</h2>
               <p>
-                2026년 서울시 청년월세지원 신청은 5월 19일에 마감되었습니다.
-                다음 모집의 조건과 일정은 달라질 수 있어요.
+                모집 일정과 조건은 바뀔 수 있습니다. 각 카드의 공식 기준에서
+                최신 공고와 본인의 최종 신청 가능 여부를 확인해주세요.
               </p>
-              <a
-                href={OFFICIAL_URL}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() =>
-                  void track("official_source_clicked", {
-                    target: "seoul_housing_portal",
-                    payload: { participant: pid, listing: listingCount },
-                  })
-                }
-              >
-                서울주거포털 공식 기준 확인하기
-                <span aria-hidden="true">↗</span>
-              </a>
             </section>
 
             <div className="prototype-result__actions">
               <button className="prototype-button prototype-button--primary" type="button" onClick={checkAnotherHome}>
-                다른 집도 확인하기
+                다음 후보 집도 확인하기
               </button>
               <button className="prototype-button prototype-button--ghost" type="button" onClick={() => goTo(2)}>
                 이 집 조건 수정하기
@@ -704,6 +832,39 @@ function RadioCards({ name, value, options, onChange }: RadioCardsProps) {
         </label>
       ))}
     </div>
+  );
+}
+
+interface ProgramCardProps {
+  program: SupportProgram;
+  onOfficialClick: () => void;
+}
+
+function ProgramCard({ program, onOfficialClick }: ProgramCardProps) {
+  return (
+    <article className={`prototype-program-card prototype-program-card--${program.fit}`}>
+      <div className="prototype-program-card__top">
+        <span className={`prototype-status prototype-status--${program.status}`}>
+          {program.statusLabel}
+        </span>
+        <span className={`prototype-fit prototype-fit--${program.fit}`}>{program.fitLabel}</span>
+      </div>
+      <p className="prototype-program-card__organizer">{program.organizer}</p>
+      <h3>{program.name}</h3>
+      <p className="prototype-program-card__summary">{program.summary}</p>
+      <ul className="prototype-program-card__reasons">
+        {program.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+      </ul>
+      <div className="prototype-program-card__actions">
+        <strong>지금 할 일</strong>
+        <ol>
+          {program.actions.map((action) => <li key={action}>{action}</li>)}
+        </ol>
+      </div>
+      <a href={program.officialUrl} target="_blank" rel="noreferrer" onClick={onOfficialClick}>
+        공식 기준 확인하기 <span aria-hidden="true">↗</span>
+      </a>
+    </article>
   );
 }
 

@@ -71,11 +71,14 @@ npm run preview
 | `listing_completed` | 후보 집 조건 완료 |
 | `result_viewed` | 확인 결과 노출 |
 | `question_copied` | 중개인 질문 복사 |
+| `research_record_copied` | 익명 검증 기록 복사 |
 | `decision_saved` | 후보 판단 기록 |
 | `official_source_clicked` | 공식 출처 확인 |
 | `second_listing_started` | 다른 집 확인 시작 |
 
-이벤트에는 연령·소득·보증금·월세 등 입력값을 저장하지 않습니다. URL의
+이벤트에는 연령·소득·보증금·월세 등 입력값을 저장하지 않습니다. Vercel에
+Supabase 환경변수가 없으면 이벤트는 브라우저 콘솔에만 남습니다. 이 경우 결과
+화면의 `익명 검증 기록 복사하기`로 원본 오픈채팅에 기록을 남깁니다. URL의
 `?participant=P01&src=openchat`처럼 익명 참가자 번호와 모집 채널만 구분할 수
 있습니다.
 

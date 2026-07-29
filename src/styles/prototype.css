@@ -554,6 +554,17 @@
   font-size: 0.75rem;
 }
 
+.prototype-export {
+  border-style: dashed;
+}
+
+.prototype-export__success {
+  margin: 10px 0 0;
+  color: var(--olive);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
 .prototype-official {
   background: var(--forest);
   color: var(--cream-88);

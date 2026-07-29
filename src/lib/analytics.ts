@@ -22,6 +22,7 @@ export type EventName =
   | "listing_completed"
   | "result_viewed"
   | "question_copied"
+  | "research_record_copied"
   | "decision_saved"
   | "official_source_clicked"
   | "second_listing_started";

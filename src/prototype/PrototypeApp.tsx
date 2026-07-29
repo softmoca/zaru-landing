@@ -43,6 +43,8 @@ export function PrototypeApp() {
   const [note, setNote] = useState("");
   const [listingCount, setListingCount] = useState(1);
   const [copyState, setCopyState] = useState<"idle" | "done" | "failed">("idle");
+  const [recordCopyState, setRecordCopyState] =
+    useState<"idle" | "done" | "failed">("idle");
   const pid = useMemo(participantId, []);
   const result = useMemo(() => evaluateCandidate(profile, home), [profile, home]);
 
@@ -127,6 +129,41 @@ export function PrototypeApp() {
     });
   };
 
+  const copyResearchRecord = async () => {
+    const decisionLabels: Record<Exclude<CandidateDecision, "">, string> = {
+      keep: "계속 후보",
+      hold: "확인 전까지 보류",
+      drop: "후보에서 제외",
+      undecided: "아직 판단하지 못함",
+    };
+    const record = [
+      "[자취선배 프로토타입 검증 기록]",
+      `참가자: ${pid}`,
+      `후보 집: ${listingCount}번째 · ${home.nickname || "이름 없음"}`,
+      `확인 결과: 맞는 조건 ${result.matched.length} / 추가 확인 ${result.verify.length} / 불일치 가능성 ${result.risk.length}`,
+      `추가 확인: ${[...result.risk, ...result.verify].map((item) => item.label).join(", ") || "없음"}`,
+      `중개인 질문: ${result.questions.join(" | ")}`,
+      `후보 판단: ${decision ? decisionLabels[decision] : "기록 전"}`,
+      `판단 메모: ${note.trim() || "없음"}`,
+      `기록 시각: ${new Date().toLocaleString("ko-KR")}`,
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(record);
+      setRecordCopyState("done");
+      void track("research_record_copied", {
+        target: `candidate_${listingCount}`,
+        payload: {
+          participant: pid,
+          listing: listingCount,
+          decision: decision || "not_recorded",
+        },
+      });
+    } catch {
+      setRecordCopyState("failed");
+    }
+  };
+
   const checkAnotherHome = () => {
     const nextListing = listingCount + 1;
     setListingCount(nextListing);
@@ -134,6 +171,7 @@ export function PrototypeApp() {
     setDecision("");
     setNote("");
     setCopyState("idle");
+    setRecordCopyState("idle");
     void track("second_listing_started", {
       target: `candidate_${nextListing}`,
       payload: { participant: pid, listing: nextListing },
@@ -566,6 +604,37 @@ export function PrototypeApp() {
               >
                 판단 기록하기
               </button>
+            </section>
+
+            <section className="prototype-result-card prototype-export" aria-labelledby="export-title">
+              <div className="prototype-result-card__heading">
+                <span className="prototype-result-card__icon" aria-hidden="true">↗</span>
+                <div>
+                  <p className="prototype-kicker">인터뷰 기록</p>
+                  <h2 id="export-title">결과를 인터뷰어에게 보내주세요</h2>
+                  <p>
+                    개인 조건과 금액은 제외하고, 참가자 번호·확인 결과·질문·후보
+                    판단만 복사합니다.
+                  </p>
+                </div>
+              </div>
+              <button
+                className="prototype-button prototype-button--secondary"
+                type="button"
+                onClick={copyResearchRecord}
+              >
+                {recordCopyState === "done" ? "검증 기록을 복사했어요" : "익명 검증 기록 복사하기"}
+              </button>
+              {recordCopyState === "done" && (
+                <p className="prototype-export__success">
+                  1:1 오픈채팅으로 돌아가 붙여넣어 주세요.
+                </p>
+              )}
+              {recordCopyState === "failed" && (
+                <p className="prototype-error">
+                  복사하지 못했어요. 이 결과 화면을 캡처해 보내주세요.
+                </p>
+              )}
             </section>
 
             <section className="prototype-official" aria-labelledby="official-title">

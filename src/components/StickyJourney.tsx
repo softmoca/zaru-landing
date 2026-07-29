@@ -4,32 +4,40 @@ import { trackOnce } from "../lib/analytics";
 const MOMENTS = [
   {
     n: 1,
-    title: "지원금 확인",
-    quote: "받을 수 있었는데 몰라서 놓치지 않도록",
-    body: "내가 확인해볼 지원금과 신청 시기, 필요한 행동을 알려줍니다. 실제 신청은 공식 서비스로 연결합니다.",
-    badge: "독립 모듈",
-    items: ["조건 확인", "신청 시기", "공식 서비스"],
+    title: "나의 조건을 입력합니다",
+    quote: "나와 가구의 기본 조건부터",
+    body: "나이·소득·가구 조건과 현재 지역, 과거 지원 이력을 확인합니다.",
+    badge: null,
+    items: ["개인 조건", "가구 조건", "지원 이력"],
   },
   {
     n: 2,
-    title: "집 보러 가기",
-    quote: "좋아 보이는 방보다, 놓치지 않은 방을 고르도록",
-    body: "현장에서 확인할 내용을 순서대로 안내하고 사진과 메모를 남깁니다. 여러 방을 같은 기준으로 비교하고, 중개인에게 다시 물어볼 질문을 정리합니다.",
-    badge: "첫 번째 핵심 검증",
-    items: ["현장 체크", "사진·메모", "같은 기준으로 비교"],
+    title: "보러 갈 집을 등록합니다",
+    quote: "후보 집의 조건을 함께",
+    body: "지역·보증금·월세·전입 가능 여부처럼 지원에 영향을 주는 집 조건을 기록합니다.",
+    badge: null,
+    items: ["지역", "주거 비용", "전입 가능 여부"],
   },
   {
     n: 3,
-    title: "입주 준비",
-    quote: "계약 이후 무엇부터 해야 할지 막막하지 않도록",
-    body: "입주일까지 해야 할 일을 날짜순으로 안내합니다. 행정 처리와 시설 확인, 입주 당시 하자와 계량기 상태도 기록합니다.",
+    title: "지원 가능성을 확인합니다",
+    quote: "확정이 아닌 판단의 단서로",
+    body: "신청 가능성이 있거나 추가 확인이 필요한 지원, 현재 조건에서는 어려울 가능성이 있는 지원을 구분합니다.",
+    badge: "첫 번째 핵심 검증",
+    items: ["신청 가능성 있음", "추가 확인 필요", "어려울 가능성"],
+  },
+  {
+    n: 4,
+    title: "질문과 증빙을 준비합니다",
+    quote: "다음 행동을 놓치지 않도록",
+    body: "중개인과 공식 기관에 확인할 질문, 신청 시기와 보관해야 할 계약서·영수증을 정리합니다.",
     badge: null,
-    items: ["날짜순 할 일", "행정 처리", "입주 상태 기록"],
+    items: ["확인 질문", "신청 일정", "증빙 보관"],
   },
 ] as const;
 
 export function StickyJourney() {
-  const [active, setActive] = useState(2);
+  const [active, setActive] = useState(3);
   const listRef = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
@@ -65,11 +73,11 @@ export function StickyJourney() {
     <section className="section moments" id="moments" aria-labelledby="moments-title">
       <div className="shell">
         <header className="section-title reveal">
-          <p className="eyebrow">작게 시작하는 범위</p>
+          <p className="eyebrow">자취선배의 첫 번째 흐름</p>
           <h2 id="moments-title">
-            자취선배가 먼저 돕는
+            마음에 드는 집을 발견했다면,
             <br />
-            세 가지 순간
+            계약하기 전에 확인합니다
           </h2>
         </header>
 

@@ -3,30 +3,35 @@ import { revealDelay } from "../lib/style";
 const STEPS = [
   {
     mark: "①",
-    title: "보러 갈 방을 등록합니다",
-    body: "가격·위치·건물 유형 등 기본 조건을 기록합니다.",
+    title: "나에게 가능한 지원 확인",
+    body: "나와 가구, 지역과 과거 수혜 이력으로 알아볼 지원을 좁힙니다.",
   },
   {
     mark: "②",
-    title: "현장에서 하나씩 확인합니다",
-    body: "수압·곰팡이·채광·소음·옵션·관리비를 순서대로 확인합니다.",
+    title: "후보 집의 지원 조건 확인",
+    body: "보증금·월세·전입 가능 여부처럼 지원에 영향을 주는 조건을 봅니다.",
   },
   {
     mark: "③",
-    title: "사진과 메모를 남깁니다",
-    body: "기억에 의존하지 않고 방마다 상태와 확인하지 못한 항목을 기록합니다.",
+    title: "현장에서 집 상태와 조건 기록",
+    body: "집의 실제 상태와 확인하지 못한 조건을 사진과 메모로 남깁니다.",
   },
   {
     mark: "④",
-    title: "같은 기준으로 비교합니다",
-    body: "여러 방을 비교하고 중개인에게 다시 물어볼 질문을 확인합니다.",
+    title: "여러 방 비교와 계약 판단",
+    body: "지원 가능성, 집 상태, 다시 물어볼 질문을 같은 기준으로 비교합니다.",
+  },
+  {
+    mark: "⑤",
+    title: "입주 준비와 증빙 보관",
+    body: "계약서·중개수수료·이사비 영수증과 신청 일정을 다음 순간으로 이어갑니다.",
   },
 ];
 
 const CHECKS = [
-  { label: "수압", state: "확인 완료", done: true },
-  { label: "곰팡이", state: "사진 2장", done: true },
-  { label: "소음", state: "저녁에 재확인", done: false },
+  { label: "전입신고", state: "중개인에게 추가 확인", done: false },
+  { label: "보증금·월세", state: "후보 집 조건 기록", done: true },
+  { label: "신청 시기", state: "공고 일정 확인 필요", done: false },
 ];
 
 export function Scenario() {
@@ -35,11 +40,11 @@ export function Scenario() {
       <div className="shell scenario__layout">
         <div>
           <header className="section-title reveal">
-            <p className="eyebrow">첫 번째 검증 · 집 보러 가는 날</p>
+            <p className="eyebrow">지원금과 집 보러 가기의 연결</p>
             <h2 id="scenario-title">
-              방을 보는 짧은 순간에도
+              지원금과 집 보기는
               <br />
-              확인해야 할 것은 많습니다
+              따로 떨어진 문제가 아닙니다
             </h2>
           </header>
 
@@ -59,10 +64,10 @@ export function Scenario() {
         <div className="check-card reveal" style={revealDelay(160)}>
           <div className="check-card__head">
             <span>
-              <small>성수동 원룸 A</small>
-              <strong>현장 체크 기록</strong>
+              <small>후보 집 A · 계약 전</small>
+              <strong>지원 조건 확인</strong>
             </span>
-            <span className="check-card__count">3 / 6</span>
+            <span className="check-card__count">추가 확인</span>
           </div>
           <ul>
             {CHECKS.map((check) => (
@@ -77,15 +82,16 @@ export function Scenario() {
           </ul>
           <div className="check-card__memo">
             <span aria-hidden="true">▧</span>
-            <p><strong>중개인에게 다시 묻기</strong><br />관리비 포함 항목, 곰팡이 수리 가능 여부</p>
+            <p><strong>다음 질문 준비</strong><br />전입신고 가능 여부와 계약서 특약 확인</p>
           </div>
         </div>
       </div>
 
       <div className="shell">
         <p className="scenario__punch reveal">
-          성공 기준은 앱을 열어본 것이 아니라,
-          <strong> 기록을 통해 질문이나 계약 판단이 달라지는 것</strong>입니다.
+          지원금 목록을 본 것으로 끝나지 않고,
+          <strong> 후보 집 비교나 중개인에게 할 질문, 계약 판단이 달라지는지</strong>
+          확인합니다.
         </p>
       </div>
     </section>

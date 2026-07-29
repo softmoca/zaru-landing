@@ -1,11 +1,11 @@
 import { revealDelay } from "../lib/style";
 
 const RECORD_FLOW = [
-  "방을 보며 하자 촬영",
-  "계약 전 수리 여부 확인",
-  "입주 당시 상태 재확인",
-  "생활 중 문제 발생 시 집주인에게 전달",
-  "퇴실할 때 기존 상태의 근거로 활용",
+  "집을 보며 전입 가능 여부 확인",
+  "후보 집 정보에 기록",
+  "지원 가능성 비교",
+  "계약 전 중개인에게 재확인",
+  "계약서·영수증 보관과 신청 일정 안내",
 ];
 
 export function LoopSection() {
@@ -15,9 +15,9 @@ export function LoopSection() {
         <header className="section-title section-title--center reveal">
           <p className="eyebrow">기록의 연결</p>
           <h2 id="record-title">
-            한 번의 기록이
+            계약 전 확인이
             <br />
-            다음 자취 순간의 근거가 됩니다
+            신청과 입주 준비까지 이어집니다
           </h2>
         </header>
 
@@ -32,8 +32,8 @@ export function LoopSection() {
         </ol>
 
         <p className="record-loop__desc lead reveal">
-          자취선배는 정보를 모아두는 서비스가 아니라,
-          <strong> 이전 순간의 기록을 다음 판단에 활용하는 서비스</strong>입니다.
+          자취선배는 정보를 보여주는 데서 끝나지 않고,
+          <strong> 확인한 조건과 기록을 다음 판단과 행동에 활용하는 서비스</strong>입니다.
         </p>
       </div>
     </section>

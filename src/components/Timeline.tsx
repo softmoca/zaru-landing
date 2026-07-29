@@ -18,8 +18,8 @@ export function Timeline() {
           <p className="eyebrow">장기적인 방향</p>
           <h2 id="timeline-title">첫 자취의 전체 사이클을 향합니다</h2>
           <p className="lead">
-            전체 사이클을 한꺼번에 만들지는 않습니다. 한 번의 사용자 여정에서는
-            지금 처한 한순간의 한 문제만 해결합니다.
+            전체 자취 사이클을 향하지만, 한 번의 사용자 여정에서는 현재 처한
+            한순간의 한 문제만 해결합니다.
           </p>
         </header>
 
@@ -34,7 +34,7 @@ export function Timeline() {
 
         <p className="timeline__principle reveal">
           <span aria-hidden="true">↗</span>
-          한순간을 검증하고, 바로 다음 순간으로 확장합니다.
+          계약 전 지원 가능성 확인부터 검증하고, 바로 다음 순간으로 확장합니다.
         </p>
       </div>
     </section>

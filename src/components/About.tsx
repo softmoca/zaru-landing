@@ -1,7 +1,10 @@
 import { useInView } from "../hooks/useInView";
-import { ZaruMark } from "./ZaruMark";
-
-const FLOW = ["알려준다", "확인한다", "기록한다", "다음 행동으로 이어진다"];
+const CONDITIONS = [
+  { label: "나의 조건", detail: "나이 · 소득 · 가구 조건" },
+  { label: "집의 조건", detail: "지역 · 보증금 · 월세 · 전입 가능 여부" },
+  { label: "지원 이력", detail: "과거 수혜와 중복 확인" },
+  { label: "시간 조건", detail: "신청 기간과 필요한 증빙" },
+];
 
 export function About() {
   const [ref, inView] = useInView<HTMLElement>({ threshold: 0.35 });
@@ -13,39 +16,33 @@ export function About() {
       aria-labelledby="about-title"
     >
       <div className="shell about__inner">
-        <p className="eyebrow">먼저 살아본 선배처럼</p>
-
-        <h2 className="about__name" id="about-title">
-          <ZaruMark size={52} className="about__mark" />
-          자취선배
-        </h2>
-
-        <p className="lead about__desc">
-          자취선배는 현재 자취 단계에 맞춰 확인할 것과 해야 할 일을 알려주고,
-          그 결과를 기록해 다음 순간까지 이어주는 서비스입니다.
-        </p>
-
-        <div className="about__context">
-          <p>
-            <span>방향 전환</span>
-            루틴을 대신 기억하는 서비스에서, 처음 겪는 순간의 다음 행동을 돕는
-            방향으로 바꿨습니다.
+        <header className="section-title reveal">
+          <p className="eyebrow">계약 전에 함께 확인할 조건</p>
+          <h2 id="about-title">
+            사람만 확인해서도,
+            <br />
+            집만 확인해서도 부족합니다
+          </h2>
+          <p className="lead">
+            지원금 이름을 아는 것과 실제 신청 가능성을 판단하는 것은 다릅니다.
+            나와 후보 집, 지원 이력과 시간을 한 흐름에서 함께 봐야 합니다.
           </p>
-          <p>
-            <span>자취선배의 자리</span>
-            방을 찾는 곳과 신청하는 곳 사이에서, 지금 무엇을 확인·판단·기록할지
-            안내합니다.
-          </p>
-        </div>
+        </header>
 
-        <ol className="about__flow" aria-label="자취선배의 핵심 흐름">
-          {FLOW.map((item, index) => (
-            <li key={item}>
-              {index > 0 && <span aria-hidden="true">→</span>}
-              <strong>{item}</strong>
+        <ol className="condition-grid">
+          {CONDITIONS.map((condition, index) => (
+            <li className="condition-card reveal" key={condition.label}>
+              <span className="num">{String(index + 1).padStart(2, "0")}</span>
+              <strong>{condition.label}</strong>
+              <p>{condition.detail}</p>
             </li>
           ))}
         </ol>
+
+        <p className="policy-note reveal">
+          자취선배는 지원 대상을 확정하지 않습니다. 신청 가능성과 추가 확인이
+          필요한 조건을 안내하고, 최종 확인과 신청은 공식 기관으로 연결합니다.
+        </p>
       </div>
     </section>
   );

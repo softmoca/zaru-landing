@@ -31,6 +31,9 @@ export function Header() {
           자취선배
           <span className="header__tag">첫 자취 생활 내비게이터</span>
         </a>
+        <a className="btn btn--small header__cta" href="#team">
+          같이 이야기하기
+        </a>
       </div>
     </header>
   );

@@ -789,6 +789,167 @@ button:focus-visible {
   font-weight: var(--weight-bold);
 }
 
+/* Initial support evidence */
+.evidence {
+  background: var(--white);
+}
+
+.evidence__cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.evidence-card {
+  min-height: 270px;
+  border: 1px solid var(--olive-16);
+  border-radius: 22px;
+  padding: 26px;
+  background: var(--cream);
+}
+
+.evidence-card .num {
+  display: block;
+  margin-bottom: 48px;
+}
+
+.evidence-card h3 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+}
+
+.evidence-card p {
+  margin: 0;
+  color: var(--ink-64);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+.evidence__quotes {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.evidence-quote {
+  margin: 0;
+  border-radius: 16px;
+  padding: 18px;
+  background: var(--olive-08);
+}
+
+.evidence-quote p {
+  margin: 0 0 10px;
+  color: var(--forest);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.evidence-quote cite {
+  color: var(--olive);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: var(--weight-bold);
+}
+
+.support-bridge {
+  overflow: hidden;
+  background: var(--beige);
+}
+
+.support-bridge__formula {
+  display: grid;
+  align-items: stretch;
+  gap: 20px;
+  border: 1px solid var(--olive-16);
+  border-radius: 26px;
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.58);
+  grid-template-columns: minmax(0, 1fr) auto minmax(190px, 0.34fr);
+}
+
+.support-bridge__conditions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.support-bridge__conditions span {
+  position: relative;
+  display: flex;
+}
+
+.support-bridge__conditions strong,
+.support-bridge__result {
+  display: flex;
+  width: 100%;
+  min-height: 94px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--olive-16);
+  border-radius: 18px;
+  padding: 18px;
+  background: var(--white);
+  color: var(--forest);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.support-bridge__conditions b {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: -16px;
+  color: var(--olive);
+  transform: translateY(-50%);
+}
+
+.support-bridge__arrow {
+  align-self: center;
+  color: var(--olive);
+  font-weight: var(--weight-bold);
+}
+
+.support-bridge__result {
+  border-color: var(--olive);
+  background: var(--olive);
+  color: var(--white);
+}
+
+.support-bridge__next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 34px 0 0;
+}
+
+.support-bridge__next li {
+  display: contents;
+}
+
+.support-bridge__next strong {
+  border-radius: var(--radius-pill);
+  padding: 9px 16px;
+  background: var(--cream);
+  color: var(--forest);
+  font-size: 0.78rem;
+}
+
+.support-bridge__next span {
+  color: var(--olive);
+}
+
+.support-bridge__notice {
+  max-width: 800px;
+  margin: 32px auto 0;
+  border-left: 3px solid var(--coral);
+  padding: 6px 18px;
+  color: var(--ink-64);
+  font-size: 0.76rem;
+}
+
 /* Scenario */
 .scenario {
   background: var(--white);
@@ -1342,7 +1503,9 @@ button:focus-visible {
   }
 
   .problems__cards,
-  .moments__grid {
+  .moments__grid,
+  .evidence__cards,
+  .evidence__quotes {
     grid-template-columns: 1fr;
   }
 
@@ -1401,6 +1564,15 @@ button:focus-visible {
 
   .validation__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .support-bridge__formula {
+    grid-template-columns: 1fr;
+  }
+
+  .support-bridge__arrow {
+    justify-self: center;
+    transform: rotate(90deg);
   }
 }
 
@@ -1484,7 +1656,8 @@ button:focus-visible {
   }
 
   .about__flow,
-  .validation__cycle {
+  .validation__cycle,
+  .support-bridge__next {
     align-items: stretch;
     flex-direction: column;
   }
@@ -1494,7 +1667,8 @@ button:focus-visible {
   }
 
   .about__flow li,
-  .validation__cycle li {
+  .validation__cycle li,
+  .support-bridge__next li {
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -1506,8 +1680,24 @@ button:focus-visible {
   }
 
   .about__flow span,
-  .validation__cycle span {
+  .validation__cycle span,
+  .support-bridge__next span {
     transform: rotate(90deg);
+  }
+
+  .support-bridge__conditions {
+    grid-template-columns: 1fr;
+  }
+
+  .support-bridge__conditions b {
+    top: -17px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .support-bridge__next strong {
+    width: 100%;
+    text-align: center;
   }
 
   .scenario__layout {

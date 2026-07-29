@@ -9,6 +9,7 @@ import { Problems } from "./components/Problems";
 import { ProgressBar } from "./components/ProgressBar";
 import { Scenario } from "./components/Scenario";
 import { StickyJourney } from "./components/StickyJourney";
+import { SupportEvidence } from "./components/SupportEvidence";
 import { Timeline } from "./components/Timeline";
 import { ValidationPlan } from "./components/ValidationPlan";
 import { useDepthTracking } from "./hooks/useDepthTracking";
@@ -42,6 +43,7 @@ export default function App() {
         <Problems />
         <About />
         <StickyJourney />
+        <SupportEvidence />
         <Scenario />
         <LoopSection />
         <Timeline />

@@ -20,7 +20,6 @@ const initialProfile: PersonalProfile = {
   separateFromParents: "unknown",
   homeOwnership: "unknown",
   incomeCheck: "unknown",
-  employment: "unknown",
   benefitHistory: [],
 };
 
@@ -461,26 +460,6 @@ export function PrototypeApp() {
                 />
               </fieldset>
 
-              <label className="prototype-field">
-                <span>현재 상태</span>
-                <select
-                  value={profile.employment}
-                  onChange={(event) =>
-                    setProfile((current) => ({
-                      ...current,
-                      employment: event.target.value as PersonalProfile["employment"],
-                    }))
-                  }
-                >
-                  <option value="unknown">아직 선택하지 않을게요</option>
-                  <option value="employed">근로 중</option>
-                  <option value="startup">사업 중</option>
-                  <option value="jobseeker">취업 준비 중</option>
-                  <option value="student">학생</option>
-                  <option value="other">그 외</option>
-                </select>
-              </label>
-
               <fieldset className="prototype-fieldset">
                 <legend>현재 받고 있거나 이전에 받은 주거혜택을 모두 선택해주세요</legend>
                 <p className="prototype-help">
@@ -731,7 +710,7 @@ export function PrototypeApp() {
                 }
               >
                 <span className="prototype-feedback-reward__icon" aria-hidden="true">☕</span>
-                <span>
+                <span className="prototype-feedback-reward__copy">
                   <strong>후기 남겨주신 분께 커피 기프티콘을 드립니다</strong>
                   <small>결과를 확인한 뒤 30초 설문에 참여해주세요.</small>
                 </span>

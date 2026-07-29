@@ -373,7 +373,6 @@ export function evaluateCandidate(
     const depositFit = fitFrom([
       ageFit(profile),
       profile.homeOwnership === "no" ? "matched" : profile.homeOwnership === "yes" ? "risk" : "verify",
-      profile.employment === "unknown" ? "verify" : "matched",
       home.housingType === "goshiwon" ? "risk" : home.housingType === "unknown" ? "verify" : "matched",
     ]);
     programs.push(
@@ -430,11 +429,7 @@ export function evaluateCandidate(
         : profile.separateFromParents === "no"
           ? "risk"
           : "verify",
-      profile.employment === "employed" || profile.employment === "startup"
-        ? "matched"
-        : profile.employment === "unknown"
-          ? "verify"
-          : "risk",
+      "verify",
     ]);
     programs.push(
       program({

@@ -35,7 +35,6 @@ export interface PersonalProfile {
   separateFromParents: Answer;
   homeOwnership: Answer;
   incomeCheck: "within" | "outside" | "unknown";
-  employment: "employed" | "startup" | "jobseeker" | "student" | "other" | "unknown";
   benefitHistory: HousingBenefitHistory[];
 }
 

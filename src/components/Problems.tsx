@@ -1,4 +1,4 @@
-import { order, revealDelay } from "../lib/style";
+import { revealDelay } from "../lib/style";
 
 /* [3] 문제 3카드 — 0/120/240ms 스태거.
    하단 띠는 좌→우 순차 점등, 마지막 "포기한다"만 회색으로 남긴다. */
@@ -6,29 +6,36 @@ import { order, revealDelay } from "../lib/style";
 const CARDS = [
   {
     n: "01",
-    title: "기준도 주기도 없다",
-    body: "욕실은 몇 주마다, 침구는 언제 빨아야 할까요? 기준이 없으면 자꾸만 미루게 됩니다.",
+    title: "지금 확인할 것을 모릅니다",
+    body: "방을 볼 때 수압·곰팡이·소음·관리비 중 무엇을 확인해야 하는지 모릅니다.",
   },
   {
     n: "02",
-    title: "정보는 많은데 '내 답'이 없다",
-    body: "검색 결과는 넘칩니다. 수많은 용품과 유행하는 업체까지 — 청소보다 제품 찾는 시간이 여가를 잡아먹습니다.",
+    title: "놓친 것은 나중에 알게 됩니다",
+    body: "계약하거나 입주한 뒤에야 확인하지 못한 문제를 발견합니다.",
   },
   {
     n: "03",
-    title: "놓치면 부채처럼 쌓인다",
-    body: "바닥 쓸기, 빨래, 쓰레기 처리… 하나둘 놓치면 끝없이 쌓여, 아까운 주말 내내 청소만 하게 됩니다.",
+    title: "기록이 다음 순간으로 이어지지 않습니다",
+    body: "사진·메모·계약 정보가 흩어져 다음 판단이나 집주인과의 대화에 활용하기 어렵습니다.",
   },
 ];
 
-const CHAIN = ["미룬다", "주기 감각이 흐려진다", "결국 포기한다"];
-
 export function Problems() {
   return (
-    <section className="section problems" aria-labelledby="problems-title">
+    <section className="section problems" id="problem" aria-labelledby="problems-title">
       <div className="shell">
         <header className="section-title reveal">
-          <h2 id="problems-title">자취 살림은, 유지가 어렵다</h2>
+          <p className="eyebrow">첫 자취의 핵심 문제</p>
+          <h2 id="problems-title">
+            첫 자취는,
+            <br />
+            무엇을 모르는지도 모릅니다
+          </h2>
+          <p className="lead">
+            정보는 이미 많습니다. 하지만 지금 무엇을 확인하고, 어떤 행동을 해야
+            하는지는 직접 찾아 조립해야 합니다.
+          </p>
         </header>
 
         <ol className="problems__cards">
@@ -45,24 +52,10 @@ export function Problems() {
           ))}
         </ol>
 
-        <ol className="chain reveal" aria-label="밀리는 과정">
-          {CHAIN.map((step, i) => (
-            <li key={step} className="chain__item" style={order(i)}>
-              {i > 0 && (
-                <span className="chain__arrow" aria-hidden="true">
-                  →
-                </span>
-              )}
-              <span
-                className={`chain__text${
-                  i === CHAIN.length - 1 ? " chain__text--muted" : ""
-                }`}
-              >
-                {step}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <p className="problems__punch reveal">
+          필요한 것은 더 많은 정보가 아니라,
+          <strong> 지금 해야 할 다음 행동</strong>입니다.
+        </p>
       </div>
     </section>
   );

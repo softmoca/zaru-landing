@@ -16,8 +16,7 @@ export type EventName =
   | "view" //         페이지 진입
   | "depth" //        스크롤 깊이 도달 (25/50/75/100)
   | "step_view" //    [5] 스티키 저니 스텝 도달
-  | "notify" //       사전예약 이메일 제출  ← 핵심 지표
-  | "kakao_click"; // 카카오톡 채널 버튼 클릭
+  | "team_cta_click"; // 팀 빌딩 CTA 클릭
 
 const SESSION_KEY = "zaru:session";
 const SRC_KEY = "zaru:src";
@@ -125,35 +124,4 @@ export function trackOnce(
   if (fired.has(key)) return;
   fired.add(key);
   void track(name, options);
-}
-
-/* ── 사전예약 ─────────────────────────────────────────────────────────────── */
-
-export type PreorderResult = "ok" | "saved-locally";
-
-/** 이메일을 preorders 에 저장하고 notify 이벤트를 남긴다.
- *  키가 없으면 콘솔에만 찍지만, 사용자에겐 동일하게 완료로 보여준다. */
-export async function submitPreorder(email: string): Promise<PreorderResult> {
-  void track("notify", { target: email, payload: { email } });
-
-  if (!supabase) {
-    console.debug("[zaru:preorder]", { email, src: currentSrc() });
-    return "saved-locally";
-  }
-
-  try {
-    const { error } = await supabase.from("preorders").insert({
-      email,
-      src: currentSrc(),
-      session: sessionId(),
-    });
-    if (error) {
-      console.warn("[zaru] 사전예약 저장 실패", error.message);
-      return "saved-locally";
-    }
-    return "ok";
-  } catch (e) {
-    console.warn("[zaru] 사전예약 저장 예외", e);
-    return "saved-locally";
-  }
 }

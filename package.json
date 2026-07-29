@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "자루(자취 루틴 관리) 사전예약 랜딩페이지",
+  "description": "자취선배 팀 빌딩 랜딩페이지",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

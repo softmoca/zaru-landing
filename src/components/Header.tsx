@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { track } from "../lib/analytics";
 import { ZaruMark } from "./ZaruMark";
 
 /** 헤더 — scrollY > 20 에서 높이 축소 + 배경 블러 (DESIGN.md 전역) */
@@ -28,11 +29,15 @@ export function Header() {
       <div className="shell header__inner">
         <a className="header__brand" href="#top">
           <ZaruMark className="header__mark" size={26} />
-          자루
-          <span className="header__tag">자취 루틴 관리</span>
+          자취선배
+          <span className="header__tag">첫 자취 생활 내비게이터</span>
         </a>
-        <a className="btn btn--primary header__cta" href="#preorder">
-          사전예약
+        <a
+          className="btn btn--primary header__cta"
+          href="#team-message"
+          onClick={() => void track("team_cta_click", { target: "header" })}
+        >
+          같이 이야기하기
         </a>
       </div>
     </header>

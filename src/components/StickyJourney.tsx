@@ -1,135 +1,95 @@
 import { useEffect, useRef, useState } from "react";
 import { trackOnce } from "../lib/analytics";
-import { PhoneFrame } from "./mockups/PhoneFrame";
-import { MOCKUPS } from "./mockups/mockups";
 
-/* [5] 핵심 기능 3축 — ★ 스티키 저니 (이 페이지의 메인 이벤트)
-
-   좌측 비주얼이 sticky 로 고정된 채, 우측 3스텝이 지나갈 때마다 화면이 바뀐다.
-   IntersectionObserver 로 "지금 화면 밴드를 가장 많이 차지한 스텝"을 골라
-   비주얼의 data-active-step 을 갱신한다.
-
-   프로토타입의 하단 탭 3개(홈 / 살림정보 / 마이)를 그대로 따른다.
-   예전 "자루 픽"과 "자취 정보 조립소"는 각각 독립 축이 아니라
-   살림정보 안의 세그먼트(살림템 / 조립소)가 됐다. */
-
-const STEPS = [
+const MOMENTS = [
   {
     n: 1,
-    title: "오늘 챙길 일",
-    body: "욕실 · 세탁 · 쓰레기 같은 카테고리마다 마지막으로 언제 했는지, 다음은 언제인지 보여드려요. 주기가 돌아오면 자루가 알림으로 불러드립니다. 주기 없이 적어만 두고 싶은 건 '적어두기'에 따로 모아둬요.",
-    shot: MOCKUPS.home,
+    title: "지원금 확인",
+    quote: "받을 수 있었는데 몰라서 놓치지 않도록",
+    body: "내가 확인해볼 지원금과 신청 시기, 필요한 행동을 알려줍니다. 실제 신청은 공식 서비스로 연결합니다.",
+    badge: "독립 모듈",
+    items: ["조건 확인", "신청 시기", "공식 서비스"],
   },
   {
     n: 2,
-    title: "살림에 필요한 건 여기 다",
-    body: "용품과 대행 서비스를 나란히 놓고 고르는 살림템, 흩어진 자취 정보를 한 장으로 모은 조립소. 먼저 겪어본 사람들의 꿀팁과 Q&A까지 한곳에 있습니다.",
-    shot: MOCKUPS.supplies,
+    title: "집 보러 가기",
+    quote: "좋아 보이는 방보다, 놓치지 않은 방을 고르도록",
+    body: "현장에서 확인할 내용을 순서대로 안내하고 사진과 메모를 남깁니다. 여러 방을 같은 기준으로 비교하고, 중개인에게 다시 물어볼 질문을 정리합니다.",
+    badge: "첫 번째 핵심 검증",
+    items: ["현장 체크", "사진·메모", "같은 기준으로 비교"],
   },
   {
     n: 3,
-    title: "쌓이는 기록",
-    body: "완료한 집안일과 저장해 둔 살림템 · 꿀팁이 차곡차곡 쌓입니다. 이번 달 몇 번이나 비워냈는지, 가끔 돌아보세요.",
-    shot: MOCKUPS.my,
+    title: "입주 준비",
+    quote: "계약 이후 무엇부터 해야 할지 막막하지 않도록",
+    body: "입주일까지 해야 할 일을 날짜순으로 안내합니다. 행정 처리와 시설 확인, 입주 당시 하자와 계량기 상태도 기록합니다.",
+    badge: null,
+    items: ["날짜순 할 일", "행정 처리", "입주 상태 기록"],
   },
 ] as const;
 
-const FLOW = [
-  "앱을 연다",
-  "오늘 챙길 일을 본다",
-  "완료를 기록한다",
-  "필요할 때 답을 찾는다",
-];
-
 export function StickyJourney() {
-  const [active, setActive] = useState(1);
+  const [active, setActive] = useState(2);
   const listRef = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
     const list = listRef.current;
     if (!list || typeof IntersectionObserver === "undefined") return;
-
-    const steps = Array.from(
-      list.querySelectorAll<HTMLElement>("[data-step]")
-    );
-
-    // 스텝별 교차 비율을 들고 있다가 가장 큰 쪽을 활성으로 삼는다.
+    const steps = Array.from(list.querySelectorAll<HTMLElement>("[data-step]"));
     const ratios = new Map<number, number>();
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const n = Number(entry.target.getAttribute("data-step"));
           ratios.set(n, entry.isIntersecting ? entry.intersectionRatio : 0);
         });
-
+        let next = 0;
         let best = 0;
-        let bestRatio = 0;
         ratios.forEach((ratio, n) => {
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
-            best = n;
+          if (ratio > best) {
+            best = ratio;
+            next = n;
           }
         });
-        // 밴드에 걸린 스텝이 하나도 없으면 마지막 활성 스텝을 유지한다.
-        if (!best) return;
-        setActive(best);
-        // 실제로 그 스텝에 도달했을 때만 기록한다 (마운트 시점의 기본값은 제외)
-        trackOnce(`step:${best}`, "step_view", { target: best });
+        if (!next) return;
+        setActive(next);
+        trackOnce(`step:${next}`, "step_view", { target: next });
       },
-      { threshold: [0.25, 0.45, 0.65], rootMargin: "-25% 0px -35% 0px" }
+      { threshold: [0.2, 0.45, 0.7], rootMargin: "-20% 0px -30% 0px" }
     );
-
     steps.forEach((step) => observer.observe(step));
     return () => observer.disconnect();
   }, []);
 
   return (
-    <section className="section journey" id="features" aria-labelledby="journey-title">
+    <section className="section moments" id="moments" aria-labelledby="moments-title">
       <div className="shell">
         <header className="section-title reveal">
-          <h2 id="journey-title">자루의 세 가지 축</h2>
+          <p className="eyebrow">작게 시작하는 범위</p>
+          <h2 id="moments-title">
+            자취선배가 먼저 돕는
+            <br />
+            세 가지 순간
+          </h2>
         </header>
 
-        <div className="journey__grid">
-          {/* 스텝과 화면은 같은 배열에서 나온다 — 개수가 어긋날 일이 없게 */}
-          <div className="journey__visual" data-active-step={active}>
-            {STEPS.map((step) => (
-              <div className="journey__screen" key={step.n} data-step={step.n}>
-                <PhoneFrame {...step.shot} />
+        <ol className="moments__grid" ref={listRef}>
+          {MOMENTS.map((moment) => (
+            <li
+              className={`moment-card${active === moment.n ? " is-active" : ""}`}
+              key={moment.n}
+              data-step={moment.n}
+            >
+              <div className="moment-card__top">
+                <span className="num">0{moment.n}</span>
+                {moment.badge && <span className="moment-card__badge">{moment.badge}</span>}
               </div>
-            ))}
-          </div>
-
-          <ol className="journey__steps" ref={listRef}>
-            {STEPS.map((step) => (
-              <li
-                key={step.n}
-                className={`journey__step${
-                  active === step.n ? " is-active" : ""
-                }`}
-                data-step={step.n}
-                aria-current={active === step.n ? "step" : undefined}
-              >
-                <p className="journey__step-num num">
-                  {String(step.n).padStart(2, "0")}
-                </p>
-                <h3 className="journey__step-title">{step.title}</h3>
-                <p className="journey__step-body">{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <ol className="flowline reveal" aria-label="자루를 쓰는 흐름">
-          {FLOW.map((item, i) => (
-            <li key={item} className="flowline__item">
-              {i > 0 && (
-                <span className="flowline__arrow" aria-hidden="true">
-                  →
-                </span>
-              )}
-              <span className="flowline__text">{item}</span>
+              <h3>{moment.title}</h3>
+              <p className="moment-card__quote">{moment.quote}</p>
+              <p>{moment.body}</p>
+              <ul className="moment-card__items" aria-label={`${moment.title} 주요 기능`}>
+                {moment.items.map((item) => <li key={item}>✓ {item}</li>)}
+              </ul>
             </li>
           ))}
         </ol>

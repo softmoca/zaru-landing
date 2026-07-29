@@ -1,16 +1,16 @@
 import { useEffect } from "react";
 import { About } from "./components/About";
-import { Empathy } from "./components/Empathy";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { LoopSection } from "./components/LoopSection";
-import { Marquee } from "./components/Marquee";
 import { Preorder } from "./components/Preorder";
 import { Problems } from "./components/Problems";
 import { ProgressBar } from "./components/ProgressBar";
 import { Scenario } from "./components/Scenario";
 import { StickyJourney } from "./components/StickyJourney";
+import { Timeline } from "./components/Timeline";
+import { ValidationPlan } from "./components/ValidationPlan";
 import { useDepthTracking } from "./hooks/useDepthTracking";
 import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 import { useRevealObserver } from "./hooks/useRevealObserver";
@@ -38,18 +38,18 @@ export default function App() {
       <Header />
 
       <main id="main">
-        <Hero /> {/* [1] */}
-        <Empathy /> {/* [2] */}
-        <Marquee /> {/* [2.5] */}
-        <Problems /> {/* [3] */}
-        <About /> {/* [4] */}
-        <StickyJourney /> {/* [5] ★ 스티키 저니 */}
-        <Scenario /> {/* [6] */}
-        <LoopSection /> {/* [7] ★ 원형 시퀀스 */}
-        <Preorder /> {/* [8] */}
+        <Hero />
+        <Problems />
+        <About />
+        <StickyJourney />
+        <Scenario />
+        <LoopSection />
+        <Timeline />
+        <ValidationPlan />
+        <Preorder />
       </main>
 
-      <Footer /> {/* [9] */}
+      <Footer />
     </>
   );
 }

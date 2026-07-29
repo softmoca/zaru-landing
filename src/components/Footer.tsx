@@ -1,7 +1,5 @@
 import { ZaruMark } from "./ZaruMark";
 
-/* [9] 푸터 */
-
 export function Footer() {
   return (
     <footer className="footer">
@@ -9,15 +7,17 @@ export function Footer() {
         <div>
           <p className="footer__brand">
             <ZaruMark size={24} />
-            자루 <span className="footer__divider">|</span> 자취 루틴 관리
+            자취선배
           </p>
           <p className="footer__line">
-            놓치는 자취 살림, 자루가 대신 기억해요.
+            처음 방을 보는 날부터 떠나는 날까지,
+            <br />
+            지금 해야 할 일을 알려주는 자취 생활 내비게이터
           </p>
         </div>
 
         <p className="footer__closing">
-          복잡한 생활을 포근하게 정리해주는 초록색 친구.
+          우아한테크코스 팀 빌딩 · 2026
         </p>
       </div>
     </footer>

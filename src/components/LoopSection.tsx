@@ -1,128 +1,40 @@
-import { useCallback, useState } from "react";
-import { useCountUp } from "../hooks/useCountUp";
-import { useInView } from "../hooks/useInView";
-import { useMediaQuery } from "../hooks/useMediaQuery";
-import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
-import { useScrollProgress } from "../hooks/useScrollProgress";
-import { order } from "../lib/style";
+import { revealDelay } from "../lib/style";
 
-/* [7] 다시 루프 — ★ 원형 시퀀스
-
-   재방문이 이 서비스의 핵심 가설이라, 그걸 눈으로 보여주는 자리.
-   섹션을 길게(220svh) 잡고 안쪽을 sticky 로 고정한 뒤,
-   스크롤 진행률 0→1 을 SVG stroke-dashoffset 에 그대로 물려 원호를 그린다.
-   0.25 / 0.5 / 0.75 / 1.0 에서 뱃지가 하나씩 켜지고, 마지막에 원이 닫힌다.
-
-   모바일(<=768px)에서는 원형 대신 세로 타임라인. 스크롤 연동 계산은 아예 끈다. */
-
-const BADGES = ["알림", "완료", "다음 주기", "다시 알림"];
-const MONTHLY_DONE = 12;
-
-/** 진행 구간 = 트랙 높이 - 뷰포트 1개. 이 구간을 다 지나면 원이 닫힌다. */
-const loopSpan = (el: HTMLElement) =>
-  Math.max(1, el.offsetHeight - window.innerHeight);
+const RECORD_FLOW = [
+  "방을 보며 하자 촬영",
+  "계약 전 수리 여부 확인",
+  "입주 당시 상태 재확인",
+  "생활 중 문제 발생 시 집주인에게 전달",
+  "퇴실할 때 기존 상태의 근거로 활용",
+];
 
 export function LoopSection() {
-  const reducedMotion = usePrefersReducedMotion();
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const scrollDriven = !reducedMotion && !isMobile;
-
-  // 몇 개까지 켜졌는지(0~4). 프레임마다가 아니라 4분면이 바뀔 때만 리렌더된다.
-  const [lit, setLit] = useState(0);
-  const handleProgress = useCallback((p: number) => {
-    const next = p >= 0.98 ? BADGES.length : Math.floor(p / 0.25);
-    setLit((prev) => (prev === next ? prev : next));
-  }, []);
-
-  const sectionRef = useScrollProgress<HTMLElement>({
-    varName: "--loop-progress",
-    span: loopSpan,
-    onProgress: handleProgress,
-    enabled: scrollDriven,
-    disabledValue: 1,
-  });
-
-  // 세로 타임라인(모바일)과 원 닫힘 연출용
-  const [viewRef, inView] = useInView<HTMLDivElement>({ threshold: 0.25 });
-  const [countRef, countInView] = useInView<HTMLParagraphElement>({
-    threshold: 0.55,
-  });
-  const count = useCountUp(MONTHLY_DONE, countInView, {
-    instant: reducedMotion,
-  });
-
-  const closed = lit >= BADGES.length;
-
   return (
-    <section
-      className={`loop${inView ? " is-drawn" : ""}${closed ? " is-closed" : ""}`}
-      id="loop"
-      ref={sectionRef}
-      aria-labelledby="loop-title"
-    >
-      <div className="loop__sticky">
-        <div className="shell loop__grid" ref={viewRef}>
-          <div className="loop__figure">
-            <div className="loop__circle">
-              <svg className="loop__svg" viewBox="0 0 320 320" aria-hidden="true">
-                <circle className="loop__track" cx="160" cy="160" r="150" />
-                <circle
-                  className="loop__arc"
-                  cx="160"
-                  cy="160"
-                  r="150"
-                  pathLength={1}
-                />
-                <g className="loop__head">
-                  <circle cx="160" cy="10" r="7" />
-                </g>
-              </svg>
+    <section className="section record-loop" id="record" aria-labelledby="record-title">
+      <div className="shell">
+        <header className="section-title section-title--center reveal">
+          <p className="eyebrow">기록의 연결</p>
+          <h2 id="record-title">
+            한 번의 기록이
+            <br />
+            다음 자취 순간의 근거가 됩니다
+          </h2>
+        </header>
 
-              <ol className="loop__badges">
-                {BADGES.map((badge, i) => (
-                  <li key={badge} className={`loop__slot loop__slot--${i}`}>
-                    <span
-                      className="loop__badge"
-                      data-on={i < lit}
-                      style={order(i)}
-                    >
-                      <span className="loop__badge-num num">{i + 1}</span>
-                      {badge}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
+        <ol className="record-flow">
+          {RECORD_FLOW.map((item, index) => (
+            <li className="record-flow__item reveal" key={item} style={revealDelay(index * 80)}>
+              <span className="record-flow__num">{String(index + 1).padStart(2, "0")}</span>
+              <strong>{item}</strong>
+              {index < RECORD_FLOW.length - 1 && <span className="record-flow__arrow" aria-hidden="true">→</span>}
+            </li>
+          ))}
+        </ol>
 
-          <div className="loop__copy">
-            <p className="eyebrow">다시 루프</p>
-            <h2 id="loop-title" className="loop__title">
-              다음 주기가 오면,
-              <br />
-              다시 자루로
-            </h2>
-            <p className="lead loop__desc">
-              완료가 쌓이고 관리 시점이 돌아오면 자루가 다시 알림을 보냅니다.
-              놓쳤던 것도, 잘 챙긴 것도 — 주기에 맞춰 다시 이어집니다.
-            </p>
-
-            <p className="loop__count" ref={countRef}>
-              <span className="visually-hidden">
-                이번 달 완료 {MONTHLY_DONE}회
-              </span>
-              <span aria-hidden="true" className="loop__count-label">
-                이번 달 완료
-              </span>
-              <span aria-hidden="true" className="loop__count-num num">
-                {count}
-              </span>
-              <span aria-hidden="true" className="loop__count-unit">
-                회
-              </span>
-            </p>
-          </div>
-        </div>
+        <p className="record-loop__desc lead reveal">
+          자취선배는 정보를 모아두는 서비스가 아니라,
+          <strong> 이전 순간의 기록을 다음 판단에 활용하는 서비스</strong>입니다.
+        </p>
       </div>
     </section>
   );

@@ -1,71 +1,32 @@
-import { Fragment, useEffect, useState } from "react";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import { useScrollProgress } from "../hooks/useScrollProgress";
 import { revealDelay } from "../lib/style";
-import { PhoneFrame } from "./mockups/PhoneFrame";
-import { MOCKUPS } from "./mockups/mockups";
 
-/* [1] 히어로
-   - 스크롤 진행률 --zaru-progress 를 CSS 변수로 흘려 패럴랙스 (폰 +30px / 좌 -22px / 우 +25px)
-   - 서브의 품목 4개는 2.4초 간격으로 하나씩 슬라이드업 강조 (문구는 그대로 둔 채 강조만 이동) */
-
-const ITEMS = ["화장실", "배수구", "이불", "에어컨 필터"];
-const CHIPS = ["#화장실", "#배수구", "#이불", "#지원금"];
-const ROTATE_MS = 2400;
+const CHIPS = ["지원금", "집 보러 가기", "입주 준비"];
 
 export function Hero() {
   const reducedMotion = usePrefersReducedMotion();
   const sectionRef = useScrollProgress<HTMLElement>({
     enabled: !reducedMotion,
   });
-  const [itemIndex, setItemIndex] = useState(0);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const timer = window.setInterval(
-      () => setItemIndex((i) => (i + 1) % ITEMS.length),
-      ROTATE_MS
-    );
-    return () => window.clearInterval(timer);
-  }, [reducedMotion]);
-
   return (
     <section className="hero" id="top" ref={sectionRef} aria-labelledby="hero-title">
       <div className="hero__glow" aria-hidden="true" />
 
       <div className="shell hero__grid">
         <div className="hero__copy">
-          <p className="eyebrow reveal">자취 루틴 관리 · 자루</p>
+          <p className="eyebrow reveal">첫 자취 생활 내비게이터 · 자취선배</p>
 
           <h1 className="hero__title reveal" id="hero-title" style={revealDelay(80)}>
-            놓치는 자취 살림,
+            처음 방을 보는 날부터,
             <br />
-            자루가 대신 기억해요
+            떠나는 날까지
           </h1>
 
-          <p className="hero__pitch reveal" style={revealDelay(140)}>
-            수리비·청소·지원금처럼
+          <p className="hero__sub reveal" style={revealDelay(160)}>
+            지금 확인할 것, 해야 할 일, 남겨둘 기록을
             <br />
-            <strong>
-              몰라서 낭비하는 <span className="hero__accent">시간과 돈</span>도
-              줄여드려요.
-            </strong>
-          </p>
-
-          <p className="hero__sub reveal" style={revealDelay(200)}>
-            {ITEMS.map((item, i) => (
-              <Fragment key={item}>
-                {i > 0 && " · "}
-                <span
-                  className={`hero__item${itemIndex === i ? " is-on" : ""}`}
-                >
-                  {item}
-                </span>
-              </Fragment>
-            ))}
-            {" — "}
-            <br className="hero__br" />
-            언제 했는지 기억 안 나는 것들, 자루가 챙겨드릴게요.
+            먼저 살아본 선배처럼 순서대로 알려드릴게요.
           </p>
 
           <ul className="hero__chips reveal" style={revealDelay(260)}>
@@ -77,37 +38,47 @@ export function Hero() {
           </ul>
 
           <div className="hero__actions reveal" style={revealDelay(340)}>
-            <a className="btn btn--primary" href="#preorder">
-              사전예약하고 먼저 받아보기
+            <a className="btn btn--primary" href="#problem">
+              우리가 해결하려는 문제 보기
             </a>
             <p className="hero__note">
-              아직 만드는 중이에요. 출시되면 가장 먼저 알려드릴게요.
+              첫 자취생의 실제 경험부터 확인하고, 필요한 것만 작게 만듭니다.
             </p>
           </div>
         </div>
 
-        {/* 캡처는 alt 로 읽히고, 주변 카드만 장식이라 따로 숨긴다 */}
-        <div className="hero__visual">
-          <div className="hero__phone">
-            {/* 첫 화면에 바로 보이므로 유일하게 eager */}
-            <PhoneFrame {...MOCKUPS.home} priority />
+        <div className="hero__visual" aria-label="집을 보며 확인하고 기록하는 과정 예시">
+          <div className="navigator-card">
+            <div className="navigator-card__top">
+              <span className="navigator-card__eyebrow">집 보러 가기 · 2/6</span>
+              <span className="navigator-card__status">현장 확인</span>
+            </div>
+            <div>
+              <p className="navigator-card__label">지금 확인할 것</p>
+              <h2>창가와 벽 모서리의<br />곰팡이를 확인해요</h2>
+            </div>
+            <div className="navigator-card__check">
+              <span aria-hidden="true">✓</span>
+              수압 확인 완료
+            </div>
+            <div className="navigator-card__record">
+              <span className="record-thumb" aria-hidden="true">＋</span>
+              <span>
+                <strong>사진과 메모 남기기</strong>
+                <small>다음 판단에 쓸 근거를 기록해요</small>
+              </span>
+            </div>
           </div>
-
-          {/* 히어로에서 가장 먼저 읽혀야 하는 카드 — 강조 한 줄의 "지원금"을 받는다 */}
-          <div className="hero__card hero__card--left" aria-hidden="true">
-            <span className="hero__card-dot" />
+          <div className="hero__float hero__float--question" aria-hidden="true">
+            <span>?</span>
             <span>
-              <b>월세 지원금 신청</b>
-              <em>오늘 알림 도착</em>
+              <b>다시 물어볼 질문</b>
+              <em>관리비에 수도 요금 포함?</em>
             </span>
           </div>
-
-          <div className="hero__card hero__card--right" aria-hidden="true">
-            <span className="hero__card-check">✓</span>
-            <span>
-              <b>이불 빨래</b>
-              <em>완료 · 다음은 3주 뒤</em>
-            </span>
+          <div className="hero__float hero__float--saved" aria-hidden="true">
+            <span>✓</span>
+            기록이 저장됐어요
           </div>
         </div>
       </div>

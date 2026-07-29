@@ -13,7 +13,7 @@
 
      create table events (
        id         bigint generated always as identity primary key,
-       name       text not null,          -- view / depth / step_view / team_cta_click
+       name       text not null,          -- view / depth / step_view
        target     text,                   -- 이벤트 대상 (스텝 번호, 깊이 % 등)
        payload    jsonb,
        src        text,                   -- 유입 경로 (?src=)

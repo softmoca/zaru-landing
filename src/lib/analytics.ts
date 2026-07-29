@@ -15,8 +15,7 @@ import { supabase } from "./supabase";
 export type EventName =
   | "view" //         페이지 진입
   | "depth" //        스크롤 깊이 도달 (25/50/75/100)
-  | "step_view" //    [5] 스티키 저니 스텝 도달
-  | "team_cta_click"; // 팀 빌딩 CTA 클릭
+  | "step_view"; //    [5] 세 가지 순간 스텝 도달
 
 const SESSION_KEY = "zaru:session";
 const SRC_KEY = "zaru:src";

@@ -17,7 +17,7 @@
 - 확장 원칙: 전체 자취 사이클을 한꺼번에 만들지 않고, 한순간을 검증한 뒤 바로 다음 순간으로 확장
 - 검증 방식: 구글폼 → 인터뷰 → 실제 집 보기 현장 테스트 → 반복 사용된 행동만 개발
 
-현재 랜딩에서는 사전예약 이메일 폼, 가짜 프로토타입, 기존 루틴 앱 캡처, 검증되지 않은 수치를 사용하지 않는다. `view`, `depth`, `step_view`는 유지하고 팀 빌딩 CTA를 `team_cta_click`으로 기록한다.
+현재 랜딩에서는 사전예약 이메일 폼, 가짜 프로토타입, 기존 루틴 앱 캡처, 검증되지 않은 수치를 사용하지 않는다. `view`, `depth`, `step_view` 계측만 유지한다.
 
 Vercel Production 브랜치는 `main`이며 기존 운영 주소는 `https://zaru-landing.vercel.app/`이다. 현재 방향은 `codex/team-building-landing` 브랜치와 Preview 배포에서만 다룬다.
 

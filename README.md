@@ -60,7 +60,6 @@ npm run preview
 - 스크롤 reveal, 상단 진행 바, 헤더 compact 전환
 - reduced motion에서 모든 콘텐츠가 즉시 노출되는지
 - 콘솔 오류가 없는지
-- 헤더와 마지막 `같이 이야기하기` CTA가 팀 빌딩 메시지로 이동하는지
 
 ## 계측
 
@@ -69,7 +68,6 @@ npm run preview
 | `view` | 페이지 진입 |
 | `depth` | 스크롤 25/50/75/100% |
 | `step_view` | 세 가지 순간 도달 |
-| `team_cta_click` | 팀 빌딩 CTA 클릭 |
 
 사전예약 이메일 폼과 `notify`, `kakao_click` 이벤트는 현재 방향에서 제거했습니다.
 

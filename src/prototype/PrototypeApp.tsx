@@ -335,7 +335,10 @@ export function PrototypeApp() {
                     ["nationalRent", "복지로(전국) 청년월세지원"],
                     ["seoulRent", "서울시 청년월세지원"],
                     ["rentHomeConditions", "내 조건뿐 아니라 후보 집 조건도 본다는 점"],
-                    ["rentOverlapLimits", "월세지원 사업 사이에 중복수혜 제한이 있다는 점"],
+                    [
+                      "rentOverlapLimits",
+                      "동시 수급은 불가하지만, 다른 월세지원 종료 후에는 신청 가능한 경우가 있다는 점",
+                    ],
                     ["depositInterest", "청년 임차보증금 이자지원"],
                     ["movingBrokerage", "부동산 중개보수(복비)·이사비 지원"],
                     ["evidenceRequired", "계약서·납부내역·영수증 같은 증빙이 필요하다는 점"],

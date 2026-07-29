@@ -30,7 +30,8 @@ const KNOWLEDGE_LABELS: Record<HousingKnowledge, string> = {
   nationalRent: "복지로(전국) 청년월세지원",
   seoulRent: "서울시 청년월세지원",
   rentHomeConditions: "후보 집 조건에 따라 월세지원 가능성이 달라진다는 점",
-  rentOverlapLimits: "월세지원 사업 사이에 중복수혜 제한이 있다는 점",
+  rentOverlapLimits:
+    "동시 수급은 불가하지만, 다른 월세지원 종료 후에는 신청 가능한 경우가 있다는 점",
   depositInterest: "청년 임차보증금 이자지원",
   movingBrokerage: "중개보수·이사비 지원",
   evidenceRequired: "계약서·납부내역·영수증 같은 증빙이 필요하다는 점",

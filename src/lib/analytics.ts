@@ -15,7 +15,9 @@ import { supabase } from "./supabase";
 export type EventName =
   | "view" //         페이지 진입
   | "depth" //        스크롤 깊이 도달 (25/50/75/100)
-  | "step_view"; //    [5] 세 가지 순간 스텝 도달
+  | "step_view" //    [5] 세 가지 순간 스텝 도달
+  | "checklist_interaction" // 랜딩 미리보기 체크리스트 사용
+  | "checklist_cta_click"; // 전체 체크리스트 DM CTA
 
 const SESSION_KEY = "zaru:session";
 const SRC_KEY = "zaru:src";

@@ -196,7 +196,7 @@ export default function App() {
                 <p className="cost-card__address">역에서 5분 · 최상층 원룸</p>
                 <div className="cost-card__price">
                   <span>월세</span>
-                  <strong>− 1만 원</strong>
+                  <strong>− 5만 원</strong>
                   <small>주변 매물보다 저렴</small>
                 </div>
                 <div className="cost-card__rows">

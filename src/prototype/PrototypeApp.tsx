@@ -189,7 +189,11 @@ export function PrototypeApp() {
           onExpand={(id) => setExpandedItem((current) => (current === id ? null : id))}
           onStatus={updateCheck}
           onNote={updateNote}
-          onStage={setActiveStage}
+          onStage={(stage) => {
+            setActiveStage(stage);
+            setExpandedItem(null);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
           onDone={() => navigate("property")}
         />
       )}
@@ -585,6 +589,8 @@ function CompareScreen({ properties, selected, compareIds, onToggle, onOpen }: {
             </table>
           </section>
 
+          <MobileCompareList properties={selected} onOpen={onOpen} />
+
           <section className="proto-risk-compare">
             <div className="proto-section-head"><div><p className="proto-kicker">RISK NOTES</p><h2>주의·미확인 항목만 모아보기</h2></div></div>
             <div className="proto-risk-grid">
@@ -602,6 +608,76 @@ function CompareScreen({ properties, selected, compareIds, onToggle, onOpen }: {
         </>
       )}
     </main>
+  );
+}
+
+function MobileCompareList({ properties, onOpen }: {
+  properties: PropertyRecord[];
+  onOpen: (id: string) => void;
+}) {
+  const rows: {
+    label: string;
+    render: (property: PropertyRecord) => string;
+    best?: (property: PropertyRecord) => boolean;
+    danger?: (property: PropertyRecord) => boolean;
+  }[] = [
+    { label: "보증금", render: (property) => `${money(property.deposit)}원` },
+    {
+      label: "월세",
+      render: (property) => `${property.rent}만 원`,
+      best: (property) => property.rent === Math.min(...properties.map((item) => item.rent)),
+    },
+    {
+      label: "관리비",
+      render: (property) => `${property.maintenance}만 원`,
+      best: (property) => property.maintenance === Math.min(...properties.map((item) => item.maintenance)),
+    },
+    {
+      label: "월 고정비",
+      render: (property) => `${property.rent + property.maintenance}만 원`,
+      best: (property) => property.rent + property.maintenance === Math.min(...properties.map((item) => item.rent + item.maintenance)),
+    },
+    { label: "층수", render: (property) => property.floor },
+    { label: "입주 가능", render: (property) => property.moveIn },
+    { label: "전체 기록", render: (property) => `${totalStats(property).recorded}/${totalStats(property).total}` },
+    {
+      label: "주의·미확인",
+      render: (property) => `${totalStats(property).caution + totalStats(property).unknown}개`,
+      danger: (property) => totalStats(property).caution + totalStats(property).unknown > 3,
+    },
+  ];
+
+  return (
+    <section className="proto-compare-mobile" aria-label="모바일 매물 비교">
+      <div className="proto-compare-mobile__properties">
+        {properties.map((property) => (
+          <button type="button" key={property.id} onClick={() => onOpen(property.id)}>
+            <i className={`is-${property.accent}`}>{property.name.slice(0, 1)}</i>
+            <span><b>{property.name}</b><small>상세 보기 →</small></span>
+          </button>
+        ))}
+      </div>
+
+      <div className="proto-compare-mobile__rows">
+        {rows.map((row) => (
+          <article key={row.label}>
+            <h2>{row.label}</h2>
+            <div>
+              {properties.map((property) => (
+                <span
+                  key={property.id}
+                  className={row.best?.(property) ? "is-best" : row.danger?.(property) ? "is-danger" : ""}
+                >
+                  <i className={`is-${property.accent}`}>{property.name.slice(0, 1)}</i>
+                  <b>{row.render(property)}</b>
+                  {row.best?.(property) && <small>가장 낮음</small>}
+                </span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -627,11 +703,12 @@ function GuideScreen({ onStart }: { onStart: () => void }) {
 }
 
 function BottomNav({ screen, onNavigate }: { screen: Screen; onNavigate: (screen: Screen) => void }) {
+  const roomActive = screen === "home" || screen === "property" || screen === "checklist";
   return (
     <nav className="proto-bottom-nav" aria-label="프로토타입 주요 메뉴">
-      <button type="button" className={screen === "home" || screen === "property" || screen === "checklist" ? "is-active" : ""} onClick={() => onNavigate("home")}><span>⌂</span><b>내 매물</b></button>
-      <button type="button" className={screen === "compare" ? "is-active" : ""} onClick={() => onNavigate("compare")}><span>⇄</span><b>비교</b></button>
-      <button type="button" className={screen === "guide" ? "is-active" : ""} onClick={() => onNavigate("guide")}><span>?</span><b>가이드</b></button>
+      <button type="button" className={roomActive ? "is-active" : ""} aria-current={roomActive ? "page" : undefined} onClick={() => onNavigate("home")}><span>⌂</span><b>내 매물</b></button>
+      <button type="button" className={screen === "compare" ? "is-active" : ""} aria-current={screen === "compare" ? "page" : undefined} onClick={() => onNavigate("compare")}><span>⇄</span><b>비교</b></button>
+      <button type="button" className={screen === "guide" ? "is-active" : ""} aria-current={screen === "guide" ? "page" : undefined} onClick={() => onNavigate("guide")}><span>?</span><b>가이드</b></button>
     </nav>
   );
 }

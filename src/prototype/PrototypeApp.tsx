@@ -1,18 +1,20 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ZaruMark } from "../components/ZaruMark";
 import {
   CheckStatus,
   ChecklistItem,
+  ChecklistTemplate,
   PropertyRecord,
   StageId,
   checklist,
   initialProperties,
+  initialTemplates,
   officialSources,
   stageMeta,
 } from "./data";
 import "./prototype.css";
 
-type Screen = "home" | "property" | "checklist" | "compare" | "guide";
+type Screen = "home" | "property" | "checklist" | "compare" | "templates" | "guide";
 
 const stageOrder: StageId[] = ["remote", "visit", "contract"];
 const money = (value: number) => `${value.toLocaleString("ko-KR")}만`;
@@ -23,12 +25,12 @@ const statusMeta: Record<CheckStatus, { label: string; symbol: string }> = {
   unknown: { label: "미확인", symbol: "?" },
 };
 
-function itemsFor(stage: StageId) {
-  return checklist.filter((item) => item.stage === stage);
+function itemsFor(stage: StageId, items: ChecklistItem[] = checklist) {
+  return items.filter((item) => item.stage === stage);
 }
 
-function stageStats(property: PropertyRecord, stage: StageId) {
-  const items = itemsFor(stage);
+function stageStats(property: PropertyRecord, stage: StageId, allItems: ChecklistItem[] = checklist) {
+  const items = itemsFor(stage, allItems);
   const records = items.map((item) => property.checks[item.id]).filter(Boolean);
   return {
     total: items.length,
@@ -39,10 +41,13 @@ function stageStats(property: PropertyRecord, stage: StageId) {
   };
 }
 
-function totalStats(property: PropertyRecord) {
-  const records = Object.values(property.checks);
+function totalStats(property: PropertyRecord, allItems: ChecklistItem[] = checklist) {
+  const activeIds = new Set(allItems.map((item) => item.id));
+  const records = Object.entries(property.checks)
+    .filter(([id]) => activeIds.has(id))
+    .map(([, record]) => record);
   return {
-    total: checklist.length,
+    total: allItems.length,
     recorded: records.length,
     good: records.filter((record) => record.status === "good").length,
     caution: records.filter((record) => record.status === "caution").length,
@@ -50,18 +55,48 @@ function totalStats(property: PropertyRecord) {
   };
 }
 
+function readStored<T>(key: string, fallback: T): T {
+  try {
+    const saved = window.localStorage.getItem(key);
+    return saved ? JSON.parse(saved) as T : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+const STORAGE_KEYS = {
+  properties: "zaru-prototype-template-properties-v1",
+  templates: "zaru-prototype-check-templates-v1",
+};
+
 export function PrototypeApp() {
   const [screen, setScreen] = useState<Screen>("home");
-  const [properties, setProperties] = useState<PropertyRecord[]>(initialProperties);
+  const [properties, setProperties] = useState<PropertyRecord[]>(() => readStored(STORAGE_KEYS.properties, initialProperties));
+  const [templates, setTemplates] = useState<ChecklistTemplate[]>(() => readStored(STORAGE_KEYS.templates, initialTemplates));
   const [activePropertyId, setActivePropertyId] = useState(initialProperties[0].id);
   const [activeStage, setActiveStage] = useState<StageId>("remote");
   const [compareIds, setCompareIds] = useState<string[]>([initialProperties[0].id, initialProperties[1].id]);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<ChecklistTemplate | "new" | null>(null);
   const [toast, setToast] = useState("");
+
+  const enabledTemplateItems = useMemo(
+    () => templates.filter((template) => template.enabled).flatMap((template) => template.items),
+    [templates]
+  );
+  const allChecklistItems = useMemo(() => [...checklist, ...enabledTemplateItems], [enabledTemplateItems]);
 
   const activeProperty = properties.find((property) => property.id === activePropertyId) ?? properties[0];
   const compared = properties.filter((property) => compareIds.includes(property.id));
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEYS.properties, JSON.stringify(properties));
+  }, [properties]);
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEYS.templates, JSON.stringify(templates));
+  }, [templates]);
 
   const navigate = (next: Screen) => {
     setScreen(next);
@@ -150,6 +185,26 @@ export function PrototypeApp() {
     setScreen("property");
   };
 
+  const saveTemplate = (template: ChecklistTemplate) => {
+    setTemplates((current) => {
+      const exists = current.some((item) => item.id === template.id);
+      return exists ? current.map((item) => item.id === template.id ? template : item) : [...current, template];
+    });
+    setEditingTemplate(null);
+    setToast("내 체크 템플릿을 저장했어요.");
+    window.setTimeout(() => setToast(""), 2200);
+  };
+
+  const toggleTemplate = (id: string) => {
+    setTemplates((current) => current.map((template) => template.id === id ? { ...template, enabled: !template.enabled } : template));
+  };
+
+  const deleteTemplate = (id: string) => {
+    setTemplates((current) => current.filter((template) => template.id !== id));
+    setToast("템플릿을 삭제했어요.");
+    window.setTimeout(() => setToast(""), 2200);
+  };
+
   return (
     <div className="proto-app">
       <ProtoHeader
@@ -162,17 +217,21 @@ export function PrototypeApp() {
       {screen === "home" && (
         <HomeScreen
           properties={properties}
+          allItems={allChecklistItems}
+          templates={templates}
           compareIds={compareIds}
           onAdd={() => setShowAdd(true)}
           onOpen={openProperty}
           onToggleCompare={toggleCompare}
           onCompare={() => navigate("compare")}
+          onTemplates={() => navigate("templates")}
         />
       )}
 
       {screen === "property" && activeProperty && (
         <PropertyScreen
           property={activeProperty}
+          allItems={allChecklistItems}
           onOpenStage={openStage}
           onCompare={() => {
             if (!compareIds.includes(activeProperty.id)) toggleCompare(activeProperty.id);
@@ -184,6 +243,7 @@ export function PrototypeApp() {
       {screen === "checklist" && activeProperty && (
         <ChecklistScreen
           property={activeProperty}
+          allItems={allChecklistItems}
           stage={activeStage}
           expandedItem={expandedItem}
           onExpand={(id) => setExpandedItem((current) => (current === id ? null : id))}
@@ -195,12 +255,14 @@ export function PrototypeApp() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           onDone={() => navigate("property")}
+          onManageTemplates={() => navigate("templates")}
         />
       )}
 
       {screen === "compare" && (
         <CompareScreen
           properties={properties}
+          allItems={allChecklistItems}
           selected={compared}
           compareIds={compareIds}
           onToggle={toggleCompare}
@@ -208,11 +270,28 @@ export function PrototypeApp() {
         />
       )}
 
-      {screen === "guide" && <GuideScreen onStart={() => navigate("home")} />}
+      {screen === "templates" && (
+        <TemplatesScreen
+          templates={templates}
+          onCreate={() => setEditingTemplate("new")}
+          onEdit={(template) => setEditingTemplate(template)}
+          onToggle={toggleTemplate}
+          onDelete={deleteTemplate}
+        />
+      )}
+
+      {screen === "guide" && <GuideScreen onStart={() => navigate("home")} customCount={enabledTemplateItems.length} />}
 
       <BottomNav screen={screen} onNavigate={navigate} />
 
       {showAdd && <AddPropertySheet onClose={() => setShowAdd(false)} onSubmit={addProperty} />}
+      {editingTemplate && (
+        <TemplateSheet
+          template={editingTemplate === "new" ? undefined : editingTemplate}
+          onClose={() => setEditingTemplate(null)}
+          onSave={saveTemplate}
+        />
+      )}
       {toast && <div className="proto-toast" role="status">{toast}</div>}
     </div>
   );
@@ -244,6 +323,7 @@ function ProtoHeader({
           {screen === "property" && <><small>매물 상세</small><b>{property?.name}</b></>}
           {screen === "checklist" && <><small>{stageMeta[("remote" as StageId)].step}–3 체크</small><b>{property?.name}</b></>}
           {screen === "compare" && <b>매물 비교</b>}
+          {screen === "templates" && <b>내 체크 템플릿</b>}
           {screen === "guide" && <b>체크 가이드</b>}
           {screen === "home" && <span>ROOM CHECK PROTOTYPE</span>}
         </div>
@@ -255,20 +335,27 @@ function ProtoHeader({
 
 function HomeScreen({
   properties,
+  allItems,
+  templates,
   compareIds,
   onAdd,
   onOpen,
   onToggleCompare,
   onCompare,
+  onTemplates,
 }: {
   properties: PropertyRecord[];
+  allItems: ChecklistItem[];
+  templates: ChecklistTemplate[];
   compareIds: string[];
   onAdd: () => void;
   onOpen: (id: string) => void;
   onToggleCompare: (id: string) => void;
   onCompare: () => void;
+  onTemplates: () => void;
 }) {
-  const totalRecorded = properties.reduce((sum, property) => sum + totalStats(property).recorded, 0);
+  const totalRecorded = properties.reduce((sum, property) => sum + totalStats(property, allItems).recorded, 0);
+  const enabledCustomCount = templates.filter((template) => template.enabled).reduce((sum, template) => sum + template.items.length, 0);
   return (
     <main className="proto-main proto-home">
       <section className="proto-home__hero">
@@ -294,6 +381,20 @@ function HomeScreen({
         ))}
       </section>
 
+      <section className="proto-template-callout">
+        <div className="proto-template-callout__icon">＋</div>
+        <div>
+          <p className="proto-kicker">MY CHECK TEMPLATE</p>
+          <h2>기본 {checklist.length}개에, 내 기준 {enabledCustomCount}개를 더했어요.</h2>
+          <p>반려동물, 야간 귀가, 재택근무처럼 나에게 중요한 항목을 템플릿으로 만들어 모든 매물에 적용하세요.</p>
+        </div>
+        <div className="proto-template-callout__summary">
+          <span><b>{templates.length}</b>개 템플릿</span>
+          <span><b>{enabledCustomCount}</b>개 적용 중</span>
+          <button type="button" onClick={onTemplates}>내 템플릿 관리 →</button>
+        </div>
+      </section>
+
       <section className="proto-properties">
         <div className="proto-section-head">
           <div><p className="proto-kicker">저장한 매물</p><h2>어느 집부터 확인할까요?</h2></div>
@@ -304,6 +405,7 @@ function HomeScreen({
             <PropertyCard
               key={property.id}
               property={property}
+              allItems={allItems}
               selected={compareIds.includes(property.id)}
               onOpen={() => onOpen(property.id)}
               onToggle={() => onToggleCompare(property.id)}
@@ -330,8 +432,8 @@ function HomeScreen({
   );
 }
 
-function PropertyCard({ property, selected, onOpen, onToggle }: { property: PropertyRecord; selected: boolean; onOpen: () => void; onToggle: () => void }) {
-  const stats = totalStats(property);
+function PropertyCard({ property, allItems, selected, onOpen, onToggle }: { property: PropertyRecord; allItems: ChecklistItem[]; selected: boolean; onOpen: () => void; onToggle: () => void }) {
+  const stats = totalStats(property, allItems);
   const percent = Math.round((stats.recorded / stats.total) * 100);
   return (
     <article className={`proto-property-card is-${property.accent}`}>
@@ -362,8 +464,8 @@ function PropertyCard({ property, selected, onOpen, onToggle }: { property: Prop
   );
 }
 
-function PropertyScreen({ property, onOpenStage, onCompare }: { property: PropertyRecord; onOpenStage: (stage: StageId) => void; onCompare: () => void }) {
-  const stats = totalStats(property);
+function PropertyScreen({ property, allItems, onOpenStage, onCompare }: { property: PropertyRecord; allItems: ChecklistItem[]; onOpenStage: (stage: StageId) => void; onCompare: () => void }) {
+  const stats = totalStats(property, allItems);
   return (
     <main className="proto-main proto-detail">
       <section className={`proto-detail-hero is-${property.accent}`}>
@@ -400,7 +502,7 @@ function PropertyScreen({ property, onOpenStage, onCompare }: { property: Proper
         <div className="proto-section-head"><div><p className="proto-kicker">CHECK FLOW</p><h2>3단계로 놓치지 않게</h2></div></div>
         <div className="proto-stage-list">
           {stageOrder.map((stage, index) => {
-            const current = stageStats(property, stage);
+            const current = stageStats(property, stage, allItems);
             const percent = Math.round((current.recorded / current.total) * 100);
             return (
               <button type="button" key={stage} onClick={() => onOpenStage(stage)}>
@@ -423,6 +525,7 @@ function PropertyScreen({ property, onOpenStage, onCompare }: { property: Proper
 
 function ChecklistScreen({
   property,
+  allItems,
   stage,
   expandedItem,
   onExpand,
@@ -430,8 +533,10 @@ function ChecklistScreen({
   onNote,
   onStage,
   onDone,
+  onManageTemplates,
 }: {
   property: PropertyRecord;
+  allItems: ChecklistItem[];
   stage: StageId;
   expandedItem: string | null;
   onExpand: (id: string) => void;
@@ -439,9 +544,10 @@ function ChecklistScreen({
   onNote: (id: string, note: string) => void;
   onStage: (stage: StageId) => void;
   onDone: () => void;
+  onManageTemplates: () => void;
 }) {
-  const items = itemsFor(stage);
-  const stats = stageStats(property, stage);
+  const items = itemsFor(stage, allItems);
+  const stats = stageStats(property, stage, allItems);
   const grouped = useMemo(() => {
     return items.reduce<Record<string, ChecklistItem[]>>((result, item) => {
       (result[item.category] ||= []).push(item);
@@ -457,6 +563,7 @@ function ChecklistScreen({
           <p className="proto-kicker">{stageMeta[stage].step} · {stageMeta[stage].short}</p>
           <h1>{stageMeta[stage].title}</h1>
           <p>{stageMeta[stage].description}</p>
+          <button className="proto-manage-template-link" type="button" onClick={onManageTemplates}>＋ 내 체크 템플릿 관리</button>
         </div>
         <div className="proto-check-progress">
           <strong>{percent}%</strong>
@@ -468,7 +575,7 @@ function ChecklistScreen({
       <nav className="proto-stage-tabs" aria-label="체크 단계">
         {stageOrder.map((item, index) => (
           <button type="button" key={item} className={stage === item ? "is-active" : ""} onClick={() => onStage(item)}>
-            <span>0{index + 1}</span><b>{stageMeta[item].short}</b><small>{stageStats(property, item).recorded}/{stageStats(property, item).total}</small>
+            <span>0{index + 1}</span><b>{stageMeta[item].short}</b><small>{stageStats(property, item, allItems).recorded}/{stageStats(property, item, allItems).total}</small>
           </button>
         ))}
       </nav>
@@ -483,7 +590,7 @@ function ChecklistScreen({
         <section className="proto-check-groups">
           {Object.entries(grouped).map(([category, categoryItems]) => (
             <div className="proto-check-group" id={`${stage}-${category}`} key={category}>
-              <div className="proto-check-group__head"><h2>{category}</h2><span>{categoryItems.filter((item) => property.checks[item.id]).length}/{categoryItems.length}</span></div>
+              <div className="proto-check-group__head"><h2>{category}{categoryItems[0]?.custom && <small>내 템플릿</small>}</h2><span>{categoryItems.filter((item) => property.checks[item.id]).length}/{categoryItems.length}</span></div>
               {categoryItems.map((item) => (
                 <CheckItemCard
                   key={item.id}
@@ -521,7 +628,7 @@ function CheckItemCard({ item, record, expanded, onExpand, onStatus, onNote }: {
       <div className="proto-check-item__main">
         <button className="proto-check-item__expand" type="button" onClick={onExpand} aria-expanded={expanded}>
           <span>{record ? statusMeta[record.status].symbol : "·"}</span>
-          <div>{item.critical && <small>중요</small>}<b>{item.title}</b><p>{item.help}</p></div>
+          <div>{item.critical && <small>중요</small>}{item.custom && <small className="is-custom">내 체크</small>}<b>{item.title}</b><p>{item.help}</p></div>
         </button>
         <div className="proto-status-buttons" aria-label={`${item.title} 상태`}>
           {(Object.keys(statusMeta) as CheckStatus[]).map((status) => (
@@ -542,14 +649,15 @@ function CheckItemCard({ item, record, expanded, onExpand, onStatus, onNote }: {
   );
 }
 
-function CompareScreen({ properties, selected, compareIds, onToggle, onOpen }: {
+function CompareScreen({ properties, allItems, selected, compareIds, onToggle, onOpen }: {
   properties: PropertyRecord[];
+  allItems: ChecklistItem[];
   selected: PropertyRecord[];
   compareIds: string[];
   onToggle: (id: string) => void;
   onOpen: (id: string) => void;
 }) {
-  const riskItems = checklist.filter((item) => selected.some((property) => {
+  const riskItems = allItems.filter((item) => selected.some((property) => {
     const status = property.checks[item.id]?.status;
     return status === "caution" || status === "unknown";
   })).slice(0, 8);
@@ -583,13 +691,13 @@ function CompareScreen({ properties, selected, compareIds, onToggle, onOpen }: {
                 <CompareRow label="월 고정비" properties={selected} render={(property) => `${property.rent + property.maintenance}만 원`} best={(property) => property.rent + property.maintenance === Math.min(...selected.map((item) => item.rent + item.maintenance))} />
                 <CompareRow label="층수" properties={selected} render={(property) => property.floor} />
                 <CompareRow label="입주 가능" properties={selected} render={(property) => property.moveIn} />
-                <CompareRow label="전체 기록" properties={selected} render={(property) => `${totalStats(property).recorded}/${totalStats(property).total}`} />
-                <CompareRow label="주의·미확인" properties={selected} render={(property) => `${totalStats(property).caution + totalStats(property).unknown}개`} danger={(property) => totalStats(property).caution + totalStats(property).unknown > 3} />
+                <CompareRow label="전체 기록" properties={selected} render={(property) => `${totalStats(property, allItems).recorded}/${totalStats(property, allItems).total}`} />
+                <CompareRow label="주의·미확인" properties={selected} render={(property) => `${totalStats(property, allItems).caution + totalStats(property, allItems).unknown}개`} danger={(property) => totalStats(property, allItems).caution + totalStats(property, allItems).unknown > 3} />
               </tbody>
             </table>
           </section>
 
-          <MobileCompareList properties={selected} onOpen={onOpen} />
+          <MobileCompareList properties={selected} allItems={allItems} onOpen={onOpen} />
 
           <section className="proto-risk-compare">
             <div className="proto-section-head"><div><p className="proto-kicker">RISK NOTES</p><h2>주의·미확인 항목만 모아보기</h2></div></div>
@@ -611,8 +719,9 @@ function CompareScreen({ properties, selected, compareIds, onToggle, onOpen }: {
   );
 }
 
-function MobileCompareList({ properties, onOpen }: {
+function MobileCompareList({ properties, allItems, onOpen }: {
   properties: PropertyRecord[];
+  allItems: ChecklistItem[];
   onOpen: (id: string) => void;
 }) {
   const rows: {
@@ -639,11 +748,11 @@ function MobileCompareList({ properties, onOpen }: {
     },
     { label: "층수", render: (property) => property.floor },
     { label: "입주 가능", render: (property) => property.moveIn },
-    { label: "전체 기록", render: (property) => `${totalStats(property).recorded}/${totalStats(property).total}` },
+    { label: "전체 기록", render: (property) => `${totalStats(property, allItems).recorded}/${totalStats(property, allItems).total}` },
     {
       label: "주의·미확인",
-      render: (property) => `${totalStats(property).caution + totalStats(property).unknown}개`,
-      danger: (property) => totalStats(property).caution + totalStats(property).unknown > 3,
+      render: (property) => `${totalStats(property, allItems).caution + totalStats(property, allItems).unknown}개`,
+      danger: (property) => totalStats(property, allItems).caution + totalStats(property, allItems).unknown > 3,
     },
   ];
 
@@ -691,11 +800,172 @@ function CompareRow({ label, properties, render, best, danger }: {
   return <tr><th>{label}</th>{properties.map((property) => <td key={property.id} className={best?.(property) ? "is-best" : danger?.(property) ? "is-danger" : ""}>{render(property)}{best?.(property) && <small>가장 낮음</small>}</td>)}</tr>;
 }
 
-function GuideScreen({ onStart }: { onStart: () => void }) {
+function TemplatesScreen({ templates, onCreate, onEdit, onToggle, onDelete }: {
+  templates: ChecklistTemplate[];
+  onCreate: () => void;
+  onEdit: (template: ChecklistTemplate) => void;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const enabledTemplates = templates.filter((template) => template.enabled);
+  const enabledItems = enabledTemplates.reduce((sum, template) => sum + template.items.length, 0);
+
+  return (
+    <main className="proto-main proto-templates">
+      <section className="proto-templates-hero">
+        <div>
+          <p className="proto-kicker">CHECKLIST BUILDER</p>
+          <h1>기본 체크에,<br /><strong>내 기준을 더하세요.</strong></h1>
+          <p>한 번 만든 템플릿은 모든 매물의 3단계 체크리스트에 자동으로 붙어요. 필요할 때만 켜고 끌 수도 있어요.</p>
+        </div>
+        <div className="proto-templates-hero__summary">
+          <span><b>{checklist.length}</b>기본 체크</span>
+          <i>＋</i>
+          <span><b>{enabledItems}</b>내 체크</span>
+          <em>=</em>
+          <span className="is-total"><b>{checklist.length + enabledItems}</b>현재 항목</span>
+        </div>
+      </section>
+
+      <section className="proto-default-template">
+        <div className="proto-template-lock">✓</div>
+        <div>
+          <small>기본 제공 · 항상 적용</small>
+          <h2>자취선배 집 체크 기본형</h2>
+          <p>온라인 확인부터 현장 방문, 계약 직전까지 놓치기 쉬운 기준을 모았어요.</p>
+        </div>
+        <div className="proto-template-stage-counts">
+          {stageOrder.map((stage) => <span key={stage}><b>{itemsFor(stage).length}</b>{stageMeta[stage].short}</span>)}
+        </div>
+      </section>
+
+      <section className="proto-my-templates">
+        <div className="proto-section-head">
+          <div><p className="proto-kicker">MY TEMPLATES</p><h2>내 체크 템플릿</h2><p>{enabledTemplates.length}개 템플릿이 모든 매물에 적용 중이에요.</p></div>
+          <button className="proto-primary" type="button" onClick={onCreate}>＋ 새 템플릿 만들기</button>
+        </div>
+
+        {templates.length === 0 ? (
+          <div className="proto-template-empty">
+            <span>＋</span><h3>아직 내 템플릿이 없어요.</h3><p>집을 볼 때마다 떠오르는 나만의 질문을 한곳에 모아보세요.</p><button type="button" onClick={onCreate}>첫 템플릿 만들기</button>
+          </div>
+        ) : (
+          <div className="proto-template-grid">
+            {templates.map((template) => {
+              const counts = stageOrder.map((stage) => ({ stage, count: template.items.filter((item) => item.stage === stage).length }));
+              return (
+                <article className={`proto-template-card${template.enabled ? " is-enabled" : ""}`} key={template.id}>
+                  <header>
+                    <div><small>내 템플릿</small><h3>{template.name}</h3></div>
+                    <button className="proto-template-toggle" type="button" role="switch" aria-checked={template.enabled} onClick={() => onToggle(template.id)}>
+                      <span />{template.enabled ? "적용 중" : "적용 안 함"}
+                    </button>
+                  </header>
+                  <p>{template.description || "나에게 중요한 확인 항목을 모은 템플릿입니다."}</p>
+                  <div className="proto-template-card__counts">
+                    {counts.filter(({ count }) => count > 0).map(({ stage, count }) => <span key={stage}>{stageMeta[stage].short} <b>{count}</b></span>)}
+                  </div>
+                  <ul>
+                    {template.items.slice(0, 3).map((item) => <li key={item.id}><i>✓</i><span>{item.title}<small>{stageMeta[item.stage].short}</small></span></li>)}
+                    {template.items.length > 3 && <li className="is-more">외 {template.items.length - 3}개 항목</li>}
+                  </ul>
+                  <footer>
+                    <button type="button" onClick={() => onEdit(template)}>수정하기</button>
+                    <button type="button" onClick={() => onDelete(template.id)}>삭제</button>
+                  </footer>
+                </article>
+              );
+            })}
+            <button className="proto-template-add-card" type="button" onClick={onCreate}><span>＋</span><b>새 템플릿</b><small>내 기준을 자유롭게 추가해보세요</small></button>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+type DraftTemplateItem = Pick<ChecklistItem, "id" | "stage" | "title" | "help">;
+
+function TemplateSheet({ template, onClose, onSave }: {
+  template?: ChecklistTemplate;
+  onClose: () => void;
+  onSave: (template: ChecklistTemplate) => void;
+}) {
+  const [name, setName] = useState(template?.name ?? "");
+  const [description, setDescription] = useState(template?.description ?? "");
+  const [draftItems, setDraftItems] = useState<DraftTemplateItem[]>(
+    template?.items.map(({ id, stage, title, help }) => ({ id, stage, title, help })) ?? [
+      { id: "", stage: "visit", title: "", help: "" },
+    ]
+  );
+  const [error, setError] = useState("");
+
+  const updateDraftItem = (index: number, patch: Partial<DraftTemplateItem>) => {
+    setDraftItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+  };
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedName = name.trim();
+    const validItems = draftItems.filter((item) => item.title.trim());
+    if (!trimmedName || validItems.length === 0) {
+      setError("템플릿 이름과 체크 항목을 하나 이상 입력해주세요.");
+      return;
+    }
+
+    const templateId = template?.id ?? `template-${Date.now()}`;
+    onSave({
+      id: templateId,
+      name: trimmedName,
+      description: description.trim(),
+      enabled: template?.enabled ?? true,
+      items: validItems.map((item, index) => ({
+        id: item.id || `custom-${templateId}-${Date.now()}-${index}`,
+        stage: item.stage,
+        category: trimmedName,
+        title: item.title.trim(),
+        help: item.help.trim() || "현장에서 확인한 내용과 답변을 메모해두세요.",
+        custom: true,
+        templateId,
+      })),
+    });
+  };
+
+  return (
+    <div className="proto-sheet-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="proto-sheet proto-template-sheet" role="dialog" aria-modal="true" aria-labelledby="template-sheet-title">
+        <div className="proto-sheet__head"><div><small>MY CHECK TEMPLATE</small><h2 id="template-sheet-title">{template ? "템플릿 수정" : "새 템플릿 만들기"}</h2></div><button type="button" onClick={onClose} aria-label="닫기">×</button></div>
+        <form onSubmit={submit}>
+          <label><span>템플릿 이름</span><input value={name} onChange={(event) => setName(event.target.value)} required placeholder="예: 반려묘와 살기" /></label>
+          <label><span>어떤 기준인지 한 줄 설명</span><input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="예: 반려묘의 안전과 생활 편의를 확인해요" /></label>
+
+          <div className="proto-template-builder-head"><div><b>체크 항목</b><span>{draftItems.length}개</span></div><button type="button" onClick={() => setDraftItems((current) => [...current, { id: "", stage: "visit", title: "", help: "" }])}>＋ 항목 추가</button></div>
+          <div className="proto-template-builder-list">
+            {draftItems.map((item, index) => (
+              <fieldset key={`${item.id}-${index}`}>
+                <legend>체크 {index + 1}</legend>
+                <label><span>확인 단계</span><select value={item.stage} onChange={(event) => updateDraftItem(index, { stage: event.target.value as StageId })}>{stageOrder.map((stage) => <option key={stage} value={stage}>{stageMeta[stage].step} · {stageMeta[stage].short}</option>)}</select></label>
+                <label><span>체크할 내용</span><input value={item.title} onChange={(event) => updateDraftItem(index, { title: event.target.value })} required placeholder="예: 방충망 틈과 고양이 탈출 위험을 확인했다" /></label>
+                <label><span>확인 팁 · 메모 안내</span><input value={item.help} onChange={(event) => updateDraftItem(index, { help: event.target.value })} placeholder="어디를 어떻게 확인하면 좋은지 적어주세요" /></label>
+                {draftItems.length > 1 && <button className="proto-remove-draft" type="button" onClick={() => setDraftItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>이 항목 삭제</button>}
+              </fieldset>
+            ))}
+          </div>
+          {error && <p className="proto-form-error" role="alert">{error}</p>}
+          <div className="proto-template-preview-note"><span>✓</span><p><b>저장하면 바로 적용돼요.</b> 모든 매물의 선택한 단계 아래에 ‘내 템플릿’ 항목으로 추가됩니다.</p></div>
+          <div className="proto-sheet__actions"><button type="button" onClick={onClose}>취소</button><button type="submit">{template ? "수정 내용 저장" : "템플릿 만들고 적용"}</button></div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+function GuideScreen({ onStart, customCount }: { onStart: () => void; customCount: number }) {
   return (
     <main className="proto-main proto-guide">
       <section className="proto-guide-hero"><p className="proto-kicker">HOW IT WORKS</p><h1>좋은 집을 찾아주는 대신,<br />좋은 질문을 놓치지 않게.</h1><p>자취선배는 법적·기술적 판단을 대신하지 않습니다. 매물마다 같은 기준으로 질문하고, 공식 기관 확인이 필요한 순간을 알려줍니다.</p><button type="button" onClick={onStart}>내 매물 확인 시작하기</button></section>
-      <section className="proto-guide-steps">{stageOrder.map((stage, index) => <article key={stage}><span>0{index + 1}</span><small>{stageMeta[stage].short}</small><h2>{stageMeta[stage].title}</h2><p>{stageMeta[stage].description}</p><b>{itemsFor(stage).length}개 체크 항목</b></article>)}</section>
+      <section className="proto-guide-steps">{stageOrder.map((stage, index) => <article key={stage}><span>0{index + 1}</span><small>{stageMeta[stage].short}</small><h2>{stageMeta[stage].title}</h2><p>{stageMeta[stage].description}</p><b>{itemsFor(stage).length}개 기본 체크</b></article>)}</section>
+      <p className="proto-guide-custom-note">여기에 현재 <b>{customCount}개의 내 체크</b>가 템플릿으로 추가되어 있어요.</p>
       <section className="proto-guide-sources"><div><p className="proto-kicker">OFFICIAL SOURCES</p><h2>중요한 판단은 공식 기준으로 연결합니다.</h2></div><ul>{officialSources.map((source) => <li key={source.href}><a href={source.href} target="_blank" rel="noreferrer">{source.label}<span>↗</span></a></li>)}</ul></section>
       <p className="proto-legal-note">이 프로토타입의 체크 항목과 결과는 법률·보증·하자 판정을 확정하지 않습니다. 실제 계약 전에는 최신 공적 장부와 공식 기관, 필요한 경우 전문가를 통해 다시 확인하세요.</p>
     </main>
@@ -708,6 +978,7 @@ function BottomNav({ screen, onNavigate }: { screen: Screen; onNavigate: (screen
     <nav className="proto-bottom-nav" aria-label="프로토타입 주요 메뉴">
       <button type="button" className={roomActive ? "is-active" : ""} aria-current={roomActive ? "page" : undefined} onClick={() => onNavigate("home")}><span>⌂</span><b>내 매물</b></button>
       <button type="button" className={screen === "compare" ? "is-active" : ""} aria-current={screen === "compare" ? "page" : undefined} onClick={() => onNavigate("compare")}><span>⇄</span><b>비교</b></button>
+      <button type="button" className={screen === "templates" ? "is-active" : ""} aria-current={screen === "templates" ? "page" : undefined} onClick={() => onNavigate("templates")}><span>＋</span><b>내 템플릿</b></button>
       <button type="button" className={screen === "guide" ? "is-active" : ""} aria-current={screen === "guide" ? "page" : undefined} onClick={() => onNavigate("guide")}><span>?</span><b>가이드</b></button>
     </nav>
   );

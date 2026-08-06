@@ -8,6 +8,16 @@ export type ChecklistItem = {
   title: string;
   help: string;
   critical?: boolean;
+  custom?: boolean;
+  templateId?: string;
+};
+
+export type ChecklistTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  items: ChecklistItem[];
 };
 
 export type CheckRecord = {
@@ -101,6 +111,44 @@ export const checklist: ChecklistItem[] = [
   { id: "contract-docs", stage: "contract", category: "지급·증거", title: "계약서·확인설명서·공제증서 사본을 받았다", help: "수정된 부분에는 당사자의 확인이 있는지 보고 파일로도 보관해요." },
   { id: "contract-report", stage: "contract", category: "계약 후 일정", title: "임대차 신고와 확정일자 계획을 확인했다", help: "대상 계약은 계약일로부터 정해진 기간 안에 신고해야 하며 전자계약은 일부 절차가 자동 연계돼요." },
   { id: "contract-movein", stage: "contract", category: "계약 후 일정", title: "잔금·열쇠·전입신고·입주 기록 일정을 적었다", help: "입주일에는 집 상태, 계량기, 열쇠와 옵션 상태를 사진으로 남길 계획을 세워요." },
+];
+
+export const initialTemplates: ChecklistTemplate[] = [
+  {
+    id: "my-lifestyle",
+    name: "나의 생활 기준",
+    description: "늦은 귀가와 실제 생활 동선까지 꼭 확인하는 나만의 체크예요.",
+    enabled: true,
+    items: [
+      {
+        id: "custom-my-lifestyle-night-route",
+        stage: "visit",
+        category: "나의 생활 기준",
+        title: "밤 10시 귀갓길의 조명과 유동 인구를 확인했다",
+        help: "낮 방문만 했다면 지도와 로드뷰로 먼저 보고, 가능하면 밤에도 다시 걸어보세요.",
+        custom: true,
+        templateId: "my-lifestyle",
+      },
+      {
+        id: "custom-my-lifestyle-walk",
+        stage: "visit",
+        category: "나의 생활 기준",
+        title: "자주 가는 역까지 실제로 걸어봤다",
+        help: "신호 대기, 언덕, 큰길 횡단까지 포함한 체감 시간을 기록해요.",
+        custom: true,
+        templateId: "my-lifestyle",
+      },
+      {
+        id: "custom-my-lifestyle-trash",
+        stage: "remote",
+        category: "나의 생활 기준",
+        title: "분리수거 요일과 배출 장소를 물었다",
+        help: "배출 시간과 음식물 쓰레기 처리 방식도 함께 확인해두세요.",
+        custom: true,
+        templateId: "my-lifestyle",
+      },
+    ],
+  },
 ];
 
 function records(entries: Array<[string, CheckStatus, string?]>): Record<string, CheckRecord> {
